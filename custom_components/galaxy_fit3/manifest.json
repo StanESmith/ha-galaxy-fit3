@@ -1,6 +1,9 @@
 {
   "domain": "galaxy_fit3",
   "name": "Samsung Galaxy Fit3",
+  "after_dependencies": [
+    "frontend"
+  ],
   "bluetooth": [
     {
       "service_uuid": "00001a1a-0000-1000-8000-00805f9b34fb"
@@ -15,7 +18,9 @@
   "config_flow": true,
   "dependencies": [
     "bluetooth",
-    "recorder"
+    "http",
+    "recorder",
+    "websocket_api"
   ],
   "documentation": "https://github.com/StanESmith/ha-galaxy-fit3",
   "integration_type": "device",
@@ -24,5 +29,5 @@
   "requirements": [
     "bleak>=0.21.0"
   ],
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

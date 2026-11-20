@@ -94,6 +94,7 @@ up again.
 |---|---|
 | `galaxy_fit3.install_watch_face` | Download a face from the store and send it to the watch (about a minute). |
 | `galaxy_fit3.set_watch_face` | Switch to a face that is already on the watch. |
+| `galaxy_fit3.fetch_face_previews` | Save the preview pictures of store faces for the dashboard (in the background). |
 | `galaxy_fit3.list_watch_faces` | Return the faces on the watch. |
 | `galaxy_fit3.set_time` | Set the watch's clock now. |
 | `galaxy_fit3.reconnect` | Drop and re-open the Bluetooth connection. |
@@ -109,42 +110,50 @@ data:
 
 ## Dashboard
 
-A two-page dashboard to manage faces by picture:
+The integration ships a dashboard view that builds itself, so nothing else needs installing:
 
-- **Galaxy Fit3**: the current face with its picture, a grid of the other faces on the watch (tap one to
-  switch, after a confirmation), a **Browse the face store** button, install progress and health graphs.
-- **Face store** (a subview): a picture of every free face that is not on the watch yet. Tap one to
-  install it; when it is done it moves to the grid on the main page.
+- **Galaxy Fit3**: the current face with its picture, a grid of the faces on the watch (tap one to switch,
+  after a confirmation), a **Browse the face store** button, install progress and health graphs.
+- **Face store** (a subview): a picture of every free face that is not on the watch yet. Tap one to install
+  it; it takes about a minute, and then the face moves to the grid.
 
-Each face is one card with a visibility condition, so the pages follow what is on the watch without
-editing. To set it up:
+The face list comes from Samsung's store when the dashboard loads, so new faces appear on their own.
+Add the two views to a dashboard (Edit dashboard -> three dots -> **Raw configuration editor**) under
+`views:`. View strategies cannot be added from the visual editor.
 
-1. **Install streamline-card** (HACS -> search "Streamline Card"). It keeps the 200 face cards short: each
-   is a template name plus the face's name, number and picture.
-2. **Get the preview pictures.** The store's screenshot links are dead; the real 256x402 previews are
-   inside each face package. Download them all (about 350 MB of packages, fetched one at a time; only
-   the PNGs are kept) and copy them to the folder the integration serves:
-   ```bash
-   python3 scripts/fetch_store_faces.py list --out faces.json
-   python3 scripts/fetch_store_faces.py previews --dir previews
-   scp previews/*.png <ha-host>:/config/www/galaxy_fit3/faces/   # or the Samba share / File editor app
-   ```
-   They are served as `/local/galaxy_fit3/faces/face_<number>.png`. The integration also saves the
-   preview of every face it installs into that folder. Photo faces (Photos, Casual Minimalist) have no
-   preview in their package; the dashboard uses their store icon instead.
-3. **Generate the dashboard** with your entity IDs and dashboard path, or use
-   [`examples/galaxy_fit3_dashboard.yaml`](examples/galaxy_fit3_dashboard.yaml) as is for a device named
-   "Galaxy Fit3" on the Overview dashboard:
-   ```bash
-   python3 scripts/build_dashboard.py faces.json --previews previews \
-       --device galaxy_fit3 --dashboard lovelace > galaxy_fit3_dashboard.yaml
-   ```
-4. **Paste it** in the dashboard's raw configuration editor (Edit dashboard -> three dots -> Raw
-   configuration editor): put `streamline_templates:` at the top level, next to `views:` (merge it into an
-   existing `streamline_templates:` block), and append the two views to `views:`. Save.
-5. **Fully reload the app or browser tab** (see [Troubleshooting](#troubleshooting)).
+```yaml
+  - title: Galaxy Fit3
+    path: galaxy-fit3
+    icon: mdi:watch-variant
+    strategy:
+      type: custom:galaxy-fit3
+  - title: Face store
+    path: galaxy-fit3-store
+    icon: mdi:storefront-outline
+    subview: true
+    back_path: /lovelace/galaxy-fit3     # your dashboard's path, then this view's path
+    strategy:
+      type: custom:galaxy-fit3
+      page: store
+```
 
-The face list is baked into the cards: a face Samsung adds later appears after you repeat steps 2-4.
+| Option | Default | |
+|---|---|---|
+| `page` | `faces` | `faces` or `store` |
+| `entry_id` | the first watch | which watch, when you have more than one |
+| `store_path` | `galaxy-fit3-store` | the store view's `path`, if you named it differently |
+| `show_health` | `true` | `false` leaves out the heart-rate and steps graphs |
+
+**Pictures.** Faces show Samsung's small store icon at first. A face's real 256x402 preview is saved when
+you install it. To save the rest, call the `galaxy_fit3.fetch_face_previews` action once (or list `face_ids`
+to fetch only some). Each preview is inside the face's store package, about 4 MB, so all of them is a few
+hundred MB, fetched one at a time in the background. They are saved under `/config/www/galaxy_fit3/faces/`
+and served as `/local/galaxy_fit3/faces/face_<number>.png`. Photo faces (Photos, Casual Minimalist) have no
+preview in their package and keep the icon.
+
+**Coming from the generated dashboard (0.1.0).** Replace its two views with the ones above, remove the
+`fit3_face` and `fit3_store_face` entries from `streamline_templates`, and uninstall Streamline Card if nothing
+else uses it. The preview pictures you already have are used as they are.
 
 ## Bluetooth adapter
 
@@ -170,10 +179,10 @@ Check an adapter on the host with `bluetoothctl mgmt.info`: `version 7` or highe
   Bluetooth 4.0. Use a 4.1+ adapter ([Bluetooth adapter](#bluetooth-adapter)).
 - **Readings stop or polls time out**: the signal is too weak; move the adapter closer to the watch.
 - **Setup does not find the watch**: unpair it from the phone, wake it, and add it by Bluetooth address.
-- **Dashboard cards show `The template "fit3_..." doesn't exist in streamline_templates`**: streamline-card
-  keeps the templates it read when the dashboard first opened, until you move to another dashboard. Fully
-  reload: close the companion app (or Settings -> Companion app -> Debugging -> Reset frontend cache), or
-  hard-refresh the browser tab.
+- **The Galaxy Fit3 view is empty, or says the view could not be built**: the message says why, usually that
+  the integration is not set up or still loading. If you see a missing custom element
+  (`ll-strategy-view-galaxy-fit3`), the dashboard loaded before the integration's script did: reload the
+  page (in the companion app, Settings -> Companion app -> Debugging -> Reset frontend cache).
 
 ### Debug logging
 
@@ -231,15 +240,15 @@ The BLE pipe: service `00001a1a-0000-1000-8000-00805f9b34fb`, write characterist
 custom_components/galaxy_fit3/   the integration
   sap/                           SAP protocol stack (pure Python)
   face_store.py  store_catalog.py   Samsung store catalogue, face downloads, preview pictures
+  frontend/galaxy-fit3.js        the dashboard view strategy (plain JavaScript, no build step)
   brand/                         the integration's icon, shown by Home Assistant 2026.3 and newer
 scripts/
   fetch_store_faces.py   list the store, download face packages, extract preview pictures
-  build_dashboard.py     generate the dashboard (face grid + Face store page)
   make_brand_images.py   draw the icon (original artwork; needs Pillow)
   release_check.py       check a release tag against the manifest and the changelog
-examples/                the generated dashboard, for a device named "Galaxy Fit3"
 tests/                   unit tests: no Home Assistant needed
 tests_ha/                integration tests inside the real Home Assistant core
+tests_js/                tests of the dashboard strategy (Node)
 CHANGELOG.md             release notes, one section per version
 ```
 
@@ -303,7 +312,6 @@ This integration was built with the help of **Claude Code** (Anthropic).
 
 - **Repository:** [github.com/StanESmith/ha-galaxy-fit3](https://github.com/StanESmith/ha-galaxy-fit3)
 - **HACS:** Add as custom repository (Integration category)
-- **streamline-card** (for the dashboard): [brunosabot/streamline-card](https://github.com/brunosabot/streamline-card)
 
 [releases-shield]: https://img.shields.io/github/v/release/StanESmith/ha-galaxy-fit3?style=for-the-badge
 [releases]: https://github.com/StanESmith/ha-galaxy-fit3/releases

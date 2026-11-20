@@ -7,6 +7,27 @@ which HACS shows when it offers the update.
 
 ## [Unreleased]
 
+## [0.2.0] - Unreleased
+
+### Added
+
+- A dashboard view that builds itself (`strategy: type: custom:galaxy-fit3`): the face grid and the Face store
+  page follow Samsung's store and what is on the watch, with nothing to maintain. Streamline Card is no longer
+  needed.
+- `galaxy_fit3.fetch_face_previews` saves the real preview pictures of store faces in the background.
+- The watch-face select lists the ids of the faces on the watch (`face_ids`).
+- `galaxy_fit3/faces` WebSocket command, which the dashboard view uses.
+
+### Changed
+
+- The integration now depends on Home Assistant's `http` and `websocket_api` components (always present) and
+  loads its dashboard script through the frontend.
+
+### Removed
+
+- The generated dashboard (`scripts/build_dashboard.py` and the example YAML). Move to the dashboard view
+  described in the README.
+
 ## [0.1.0] - 2026-11-20
 
 First public release.

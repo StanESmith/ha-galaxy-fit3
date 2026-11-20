@@ -149,3 +149,10 @@ install_watch_face:
       default: true
       selector:
         boolean:
+
+fetch_face_previews:
+  fields:
+    face_ids:
+      example: "[16, 106]"
+      selector:
+        object:

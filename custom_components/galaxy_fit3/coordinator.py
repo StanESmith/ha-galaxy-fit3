@@ -81,6 +81,7 @@ class Fit3Coordinator(DataUpdateCoordinator[WatchStatus]):
         self.install_state: str = INSTALL_IDLE
         self.install_info: dict[str, object] = {}
         self._install_task: asyncio.Task | None = None
+        self._preview_task: asyncio.Task | None = None
         self._route = routing.RouteHolder()  # the adapters that hold a bond; refreshed before each connect
         self._route_logged: str | None = None
         self._link_lock = asyncio.Lock()  # one user of the link at a time: a poll, a face change or a service call
@@ -203,6 +204,34 @@ class Fit3Coordinator(DataUpdateCoordinator[WatchStatus]):
         self._install_task = self.hass.async_create_background_task(
             self._install_in_background(face_id, style), f"{DOMAIN} install face {face_id}"
         )
+
+    def async_start_preview_fetch(self, face_ids: list[int] | None = None) -> int:
+        """Save missing preview pictures in the background, one package at a time; returns how many are queued.
+
+        Each preview lives inside the face's store package (about 4 MB), so fetching all of them downloads
+        a few hundred MB. Faces that already have a preview are skipped.
+        """
+        wanted = list(self.store_faces) if face_ids is None else face_ids
+        missing = [face_id for face_id in wanted if face_id not in self.local_previews]
+        if not missing:
+            return 0
+        if self._preview_task is not None and not self._preview_task.done():
+            raise HomeAssistantError("Previews are already being fetched.")
+        self._preview_task = self.entry.async_create_background_task(
+            self.hass, self._fetch_previews(missing), f"{DOMAIN} fetch face previews"
+        )
+        return len(missing)
+
+    async def _fetch_previews(self, face_ids: list[int]) -> None:
+        saved = 0
+        for face_id in face_ids:
+            try:
+                saved += await face_store.async_fetch_preview(self.hass, face_id)
+            except Exception as err:  # noqa: BLE001 - one failed download must not stop the rest
+                _LOGGER.debug("Fit3 %s: no preview for face %d: %s", self.address, face_id, err)
+            self.local_previews = await face_store.async_local_previews(self.hass)
+            self.async_update_listeners()
+        _LOGGER.info("Fit3 %s: saved %d of %d face previews", self.address, saved, len(face_ids))
 
     async def _install_in_background(self, face_id: int, style: int = 0) -> None:
         try:

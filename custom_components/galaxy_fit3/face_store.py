@@ -81,13 +81,8 @@ async def async_local_previews(hass: HomeAssistant) -> set[int]:
     return await hass.async_add_executor_job(_scan)
 
 
-async def async_get_face_file(hass: HomeAssistant, face_id: int, *, refresh: bool = False) -> bytes:
-    """The face's ``.bin``, from the cache or downloaded from the store."""
-    path = cache_dir(hass) / faceinstall.face_filename(face_id)
-    if not refresh:
-        cached = await hass.async_add_executor_job(lambda: path.read_bytes() if path.is_file() else None)
-        if cached:
-            return cached
+async def _async_download_package(hass: HomeAssistant, face_id: int) -> bytes:
+    """The face's store package (an APK, about 4 MB)."""
     app_id = f"{APP_PREFIX}{face_id:04d}"
     digest = hashlib.sha1((app_id + "GALAXYAPPSAPI").encode("iso-8859-1")).digest()
     params = {
@@ -103,7 +98,23 @@ async def async_get_face_file(hass: HomeAssistant, face_id: int, *, refresh: boo
         raise FaceStoreError(f"the store has no face {face_id}: {_field(xml, 'resultMsg') or 'no answer'}")
     async with session.get(_field(xml, "downloadURI"), timeout=120) as resp:
         resp.raise_for_status()
-        apk = await resp.read()
+        return await resp.read()
+
+
+def _save_preview(hass: HomeAssistant, face_id: int, preview: bytes) -> None:
+    target = preview_dir(hass) / f"face_{face_id}.png"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(preview)
+
+
+async def async_get_face_file(hass: HomeAssistant, face_id: int, *, refresh: bool = False) -> bytes:
+    """The face's ``.bin``, from the cache or downloaded from the store (its preview is saved too)."""
+    path = cache_dir(hass) / faceinstall.face_filename(face_id)
+    if not refresh:
+        cached = await hass.async_add_executor_job(lambda: path.read_bytes() if path.is_file() else None)
+        if cached:
+            return cached
+    apk = await _async_download_package(hass, face_id)
     data = await hass.async_add_executor_job(_extract_bin, apk, face_id)
     preview = await hass.async_add_executor_job(_extract_preview, apk, face_id)
 
@@ -111,12 +122,20 @@ async def async_get_face_file(hass: HomeAssistant, face_id: int, *, refresh: boo
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
         if preview:
-            target = preview_dir(hass) / f"face_{face_id}.png"
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(preview)
+            _save_preview(hass, face_id, preview)
 
     await hass.async_add_executor_job(_save)
     return data
+
+
+async def async_fetch_preview(hass: HomeAssistant, face_id: int) -> bool:
+    """Save the face's preview picture without keeping the face file. False if the package has none."""
+    apk = await _async_download_package(hass, face_id)
+    preview = await hass.async_add_executor_job(_extract_preview, apk, face_id)
+    if not preview:
+        return False
+    await hass.async_add_executor_job(_save_preview, hass, face_id, preview)
+    return True
 
 
 async def async_list_faces(hass: HomeAssistant) -> dict[int, store_catalog.StoreFace]:

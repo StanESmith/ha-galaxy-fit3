@@ -156,6 +156,16 @@
           "description": "Return when the face is on the watch (about a minute). Turn off to start the install and return at once; the face install sensor shows progress."
         }
       }
+    },
+    "fetch_face_previews": {
+      "name": "Fetch face previews",
+      "description": "Save the preview pictures of store faces so the dashboard can show them. Each preview is inside the face's store package (about 4 MB), so fetching all of them downloads a few hundred MB, one package at a time in the background. Faces that already have a preview are skipped.",
+      "fields": {
+        "face_ids": {
+          "name": "Faces",
+          "description": "Face numbers to fetch. Leave empty for every face in the store."
+        }
+      }
     }
   },
   "options": {

@@ -70,6 +70,21 @@ jobs:
       - name: Run the Home Assistant tests
         run: .venv/bin/pytest tests_ha
 
+  js-tests:
+    name: Dashboard strategy tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Run the strategy tests
+        run: node --test "tests_js/*.test.mjs"
+
   hassfest:
     name: HACS Validation (hassfest)
     runs-on: ubuntu-latest

@@ -19,10 +19,12 @@ import homeassistant.helpers.config_validation as cv
 
 from .const import DOMAIN
 from .coordinator import Fit3Coordinator
+from .dashboard import async_setup_frontend
 from .sap.errors import NotConnected
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SELECT, Platform.BUTTON]
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 DIAGNOSTIC_DEBUG = True
 
@@ -76,8 +78,18 @@ INSTALL_WATCH_FACE_SCHEMA = vol.Schema(
     }
 )
 SERVICE_FORGET_BOND = "forget_bond"
+SERVICE_FETCH_FACE_PREVIEWS = "fetch_face_previews"
+FETCH_FACE_PREVIEWS_SCHEMA = vol.Schema(
+    {vol.Optional("face_ids"): vol.All(cv.ensure_list, [vol.All(vol.Coerce(int), vol.Range(min=1, max=255))])}
+)
 
 _NOT_READY = "The Galaxy Fit3 is not connected; try again when it is nearby."
+
+
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Once per Home Assistant: serve the dashboard strategy (config entries are set up separately)."""
+    await async_setup_frontend(hass)
+    return True
 
 
 async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -223,6 +235,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         schema=INSTALL_WATCH_FACE_SCHEMA,
         supports_response=SupportsResponse.OPTIONAL,
     )
+
+    async def _handle_fetch_face_previews(call: ServiceCall) -> ServiceResponse:
+        return {"queued": coordinator.async_start_preview_fetch(call.data.get("face_ids"))}
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_FETCH_FACE_PREVIEWS,
+        _handle_fetch_face_previews,
+        schema=FETCH_FACE_PREVIEWS_SCHEMA,
+        supports_response=SupportsResponse.OPTIONAL,
+    )
     return True
 
 
@@ -245,4 +268,5 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             hass.services.async_remove(DOMAIN, SERVICE_LIST_WATCH_FACES)
             hass.services.async_remove(DOMAIN, SERVICE_INSTALL_WATCH_FACE)
             hass.services.async_remove(DOMAIN, SERVICE_FORGET_BOND)
+            hass.services.async_remove(DOMAIN, SERVICE_FETCH_FACE_PREVIEWS)
     return unload_ok

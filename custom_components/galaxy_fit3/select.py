@@ -57,7 +57,10 @@ class Fit3WatchFaceSelect(CoordinatorEntity[Fit3Coordinator], SelectEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, object]:
-        return {"face_id": self.coordinator.current_face_id}
+        return {
+            "face_id": self.coordinator.current_face_id,
+            "face_ids": [face.face_id for face in self.coordinator.watch_faces],  # the dashboard shows these
+        }
 
     async def async_select_option(self, option: str) -> None:
         await self.coordinator.async_select_face(option)

@@ -49,6 +49,14 @@ jobs:
           .venv-ha/bin/python tests_ha/ha_requirements.py | uv pip install --python .venv-ha/bin/python -r -
           .venv-ha/bin/pytest tests_ha
 
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Run the dashboard strategy tests
+        run: node --test "tests_js/*.test.mjs"
+
       - name: Create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

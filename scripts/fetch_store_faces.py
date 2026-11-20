@@ -15,7 +15,8 @@ Usage:
   fetch_store_faces.py previews [<face-number>...] --dir DIR
 
 `previews` saves each face's 256x402 preview as DIR/face_<number>.png, the layout the
-integration serves from config/www/galaxy_fit3/faces/ (see scripts/build_dashboard.py).
+integration serves from config/www/galaxy_fit3/faces/. (The integration can fetch them itself: the
+galaxy_fit3.fetch_face_previews action.)
 The store's screenshot links are dead, so the previews come out of the packages; photo
 faces have none and the dashboard uses their store icon instead.
 
