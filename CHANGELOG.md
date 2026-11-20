@@ -7,7 +7,7 @@ which HACS shows when it offers the update.
 
 ## [Unreleased]
 
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-11-20
 
 First public release.
 
