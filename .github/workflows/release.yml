@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Check the tag against the manifest and changelog
         run: python3 scripts/release_check.py "$GITHUB_REF_NAME" --notes release-notes.md
