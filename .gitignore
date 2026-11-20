@@ -1,0 +1,31 @@
+*.apk
+*.apkm
+*.key
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Capture / pairing material (never commit)
+*.log
+*.btsnoop
+btsnoo*
+*.pcap
+*.pcapng
+*.bin
+
+# CI / analysis output
+coverage.xml
+.coverage
+test-results.xml
+.scannerwork/
+.sonar/
+.cache/
+
+# Samsung watch-face packages (scripts/fetch_store_faces.py output)
+*.bin
+faces/

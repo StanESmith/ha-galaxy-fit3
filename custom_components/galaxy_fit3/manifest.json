@@ -1,0 +1,25 @@
+{
+  "domain": "galaxy_fit3",
+  "name": "Samsung Galaxy Fit3",
+  "bluetooth": [
+    {
+      "service_uuid": "00001a1a-0000-1000-8000-00805f9b34fb"
+    }
+  ],
+  "codeowners": [
+    "@StanESmith"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "bluetooth",
+    "recorder"
+  ],
+  "documentation": "https://github.com/StanESmith/ha-galaxy-fit3",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/StanESmith/ha-galaxy-fit3/issues",
+  "requirements": [
+    "bleak>=0.21.0"
+  ],
+  "version": "0.1.0"
+}

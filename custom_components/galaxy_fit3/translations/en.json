@@ -1,0 +1,174 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Add Galaxy Fit3",
+        "description": "Enter the watch's Bluetooth address. Unpair the watch from your phone first, wake it, and keep it near this Home Assistant host. Next, the watch shows a pairing code.",
+        "data": {
+          "address": "Bluetooth address",
+          "name": "Name",
+          "skip_pairing": "Skip pairing for now (pair on the first connection)"
+        }
+      },
+      "confirm": {
+        "title": "Add Galaxy Fit3",
+        "description": "Do you want to set up {name}?"
+      },
+      "confirm_code": {
+        "title": "Confirm the pairing code",
+        "description": "The watch should be showing a pairing code. Home Assistant received this code:\n\n**{code}**\n\nOnly tick the box if the code on the watch is exactly the same. If it differs, leave it unticked: the pairing will be rejected and nothing is paired.",
+        "data": {
+          "matches": "The code on the watch matches"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This watch is already configured.",
+      "cannot_pair": "Could not pair with the watch. Make sure it is unpaired from your phone, awake, nearby and Bluetooth is on, then try again.",
+      "code_mismatch": "The pairing code was not confirmed, so setup was cancelled. Nothing was paired."
+    },
+    "progress": {
+      "wait_code": "Connecting to the watch and waiting for it to show a pairing code. Keep it awake and nearby.",
+      "finishing": "Finishing pairing and setting up the watch. This can take up to a minute; don't dismiss anything on the watch."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "heart_rate": {
+        "name": "Heart rate"
+      },
+      "steps": {
+        "name": "Steps"
+      },
+      "face_install": {
+        "name": "Face install",
+        "state": {
+          "idle": "Idle",
+          "downloading": "Downloading",
+          "sending": "Sending to watch",
+          "installed": "Installed",
+          "failed": "Failed"
+        }
+      }
+    },
+    "select": {
+      "watch_face": {
+        "name": "Watch face"
+      },
+      "store_face": {
+        "name": "Store face"
+      }
+    },
+    "button": {
+      "install_face": {
+        "name": "Install watch face"
+      }
+    }
+  },
+  "services": {
+    "set_time": {
+      "name": "Set watch time",
+      "description": "Push the current time and timezone to the watch now (also done on every connect and hourly).",
+      "fields": {
+        "is_24h": {
+          "name": "24-hour format",
+          "description": "Use 24-hour clock display on the watch."
+        },
+        "tz_offset_seconds": {
+          "name": "Time zone offset (seconds)",
+          "description": "Offset from UTC in seconds."
+        }
+      }
+    },
+    "set_time_rtc": {
+      "name": "Set watch time (settings channel, experimental)",
+      "description": "Diagnostics: send the phone's real set-time message on the settings channel (route 0b0b). Its byte layout is unconfirmed, so byte order and offset unit are selectable.",
+      "fields": {
+        "is_24h": {
+          "name": "24-hour format",
+          "description": "Use 24-hour clock display on the watch."
+        },
+        "tz_offset_seconds": {
+          "name": "Time zone offset (seconds)",
+          "description": "Offset from UTC in seconds (default: Home Assistant's zone)."
+        },
+        "byte_order": {
+          "name": "Byte order",
+          "description": "Byte order of the multi-byte fields."
+        },
+        "offset_unit": {
+          "name": "Offset unit",
+          "description": "Whether the offset field is in seconds or minutes."
+        }
+      }
+    },
+    "reconnect": {
+      "name": "Reconnect (diagnostics)",
+      "description": "Drop the link and reconnect now, optionally replaying only the first N setup frames (0 = none) to find which one resets the watch's clock.",
+      "fields": {
+        "replay_frames": {
+          "name": "Setup frames to replay",
+          "description": "0-27. Leave empty to replay all of them."
+        }
+      }
+    },
+    "set_watch_face": {
+      "name": "Set watch face",
+      "description": "Show a watch face on the watch. A built-in face that was removed is put back.",
+      "fields": {
+        "face_id": {
+          "name": "Face ID",
+          "description": "Face number, e.g. 79 (list_watch_faces shows the ones on the watch)."
+        },
+        "group": {
+          "name": "Group",
+          "description": "Group id of the face from list_watch_faces; looked up automatically if left empty."
+        }
+      }
+    },
+    "list_watch_faces": {
+      "name": "List watch faces",
+      "description": "Return the faces installed on the watch (id, group, package, name)."
+    },
+    "forget_bond": {
+      "name": "Forget bond",
+      "description": "Remove Home Assistant's Bluetooth bond with the watch so the next connection pairs again from scratch."
+    },
+    "install_watch_face": {
+      "name": "Install watch face",
+      "description": "Download a watch face from the Samsung store and install it on the watch over Bluetooth Classic. Takes about a minute; the watch must be near the Home Assistant Bluetooth adapter.",
+      "fields": {
+        "face_id": {
+          "name": "Face ID",
+          "description": "Store face number, e.g. 16 for Progress gauge 1."
+        },
+        "style": {
+          "name": "Style",
+          "description": "Style variant of the face (0 is the first)."
+        },
+        "handshake_only": {
+          "name": "Handshake only",
+          "description": "Test the connection: open and close the watch's file channel without sending the face."
+        },
+        "wait": {
+          "name": "Wait for the install",
+          "description": "Return when the face is on the watch (about a minute). Turn off to start the install and return at once; the face install sensor shows progress."
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Galaxy Fit3 options",
+        "data": {
+          "is_24h": "24-hour clock"
+        },
+        "data_description": {
+          "is_24h": "Show time in 24-hour format (off = 12-hour). Applied on the next time sync."
+        }
+      }
+    }
+  }
+}

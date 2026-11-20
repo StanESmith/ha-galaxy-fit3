@@ -1,0 +1,2478 @@
+streamline_templates:
+  fit3_face:
+    card:
+      type: picture-entity
+      entity: select.galaxy_fit3_watch_face
+      image: '[[image]]'
+      name: '[[name]]'
+      show_name: true
+      show_state: false
+      tap_action:
+        action: perform-action
+        perform_action: select.select_option
+        target:
+          entity_id: select.galaxy_fit3_watch_face
+        data:
+          option: '[[name]]'
+        confirmation:
+          text: Switch the watch to [[name]]?
+      hold_action:
+        action: none
+  fit3_store_face:
+    card:
+      type: picture-entity
+      entity: select.galaxy_fit3_watch_face
+      image: '[[image]]'
+      name: '[[name]]'
+      show_name: true
+      show_state: false
+      tap_action:
+        action: perform-action
+        perform_action: galaxy_fit3.install_watch_face
+        data:
+          face_id: '[[id]]'
+          wait: false
+        confirmation:
+          text: Install [[name]] on the watch? It takes about a minute; keep the watch near Home Assistant.
+      hold_action:
+        action: none
+views:
+- title: Galaxy Fit3
+  path: galaxy-fit3
+  icon: mdi:watch-variant
+  type: sections
+  max_columns: 3
+  sections:
+  - type: grid
+    cards:
+    - type: heading
+      heading: Watch face
+      icon: mdi:watch-variant
+      badges:
+      - type: entity
+        entity: sensor.galaxy_fit3_battery
+        show_state: true
+    - type: markdown
+      grid_options:
+        columns: 12
+        rows: auto
+      content: '{% set p = state_attr(''select.galaxy_fit3_watch_face'', ''entity_picture'') %}{% if p %}<img src="{{ p }}" width="96" align="left" style="margin-right:16px">{% endif %}
+
+        <small>Showing now</small>
+
+        ### {{ states(''select.galaxy_fit3_watch_face'') if states(''select.galaxy_fit3_watch_face'') not in [''unknown'', ''unavailable''] else ''Waiting for the watch'' }}
+
+        <small>Tap a face below to switch. The watch changes on its next connection, a few seconds when it is near Home Assistant.</small>'
+    - type: heading
+      heading: Tap to switch
+      heading_style: subtitle
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: 3D time
+        image: /local/galaxy_fit3/faces/face_77.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''3D time'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''3D time'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Active
+        image: /local/galaxy_fit3/faces/face_21.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Active'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Active'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Activity arc
+        image: /local/galaxy_fit3/faces/face_43.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Activity arc'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Activity arc'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Activity bars
+        image: /local/galaxy_fit3/faces/face_89.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Activity bars'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Activity bars'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Activity lanes
+        image: /local/galaxy_fit3/faces/face_124.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Activity lanes'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Activity lanes'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Analog 1
+        image: /local/galaxy_fit3/faces/face_1.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Analog 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Analog 1'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Analog 2
+        image: /local/galaxy_fit3/faces/face_20.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Analog 2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Analog 2'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Analog 3
+        image: /local/galaxy_fit3/faces/face_101.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Analog 3'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Analog 3'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Angled info
+        image: /local/galaxy_fit3/faces/face_66.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Angled info'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Angled info'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Animals
+        image: /local/galaxy_fit3/faces/face_25.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Animals'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Animals'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Basic clock
+        image: /local/galaxy_fit3/faces/face_38.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Basic clock'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Basic clock'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Basic dashboard
+        image: /local/galaxy_fit3/faces/face_3.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Basic dashboard'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Basic dashboard'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Beach sunset
+        image: /local/galaxy_fit3/faces/face_97.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Beach sunset'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Beach sunset'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Big hours
+        image: /local/galaxy_fit3/faces/face_110.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Big hours'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Big hours'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Big info
+        image: /local/galaxy_fit3/faces/face_11.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Big info'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Big info'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Big Time
+        image: /local/galaxy_fit3/faces/face_19.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Big Time'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Big Time'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Black and white
+        image: /local/galaxy_fit3/faces/face_112.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Black and white'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Black and white'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Blending colors
+        image: /local/galaxy_fit3/faces/face_59.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Blending colors'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Blending colors'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Candy companions
+        image: /local/galaxy_fit3/faces/face_118.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Candy companions'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Candy companions'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Casual Minimalist
+        image: https://img.samsungapps.com/productNew/000007216046/IconImage_20250305225123714_NEW_WAP_ICON_146_146.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Casual Minimalist'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Casual Minimalist'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Charged up
+        image: /local/galaxy_fit3/faces/face_117.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Charged up'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Charged up'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Classic clock
+        image: /local/galaxy_fit3/faces/face_71.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Classic clock'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Classic clock'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Classic digital
+        image: /local/galaxy_fit3/faces/face_120.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Classic digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Classic digital'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Color duo
+        image: /local/galaxy_fit3/faces/face_12.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Color duo'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Color duo'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Color Pie
+        image: /local/galaxy_fit3/faces/face_34.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Color Pie'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Color Pie'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Colorbands
+        image: /local/galaxy_fit3/faces/face_103.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Colorbands'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Colorbands'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Cosmic city
+        image: /local/galaxy_fit3/faces/face_121.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Cosmic city'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Cosmic city'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Cute character
+        image: /local/galaxy_fit3/faces/face_24.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Cute character'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Cute character'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Date window
+        image: /local/galaxy_fit3/faces/face_14.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Date window'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Date window'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Detailed dashboard
+        image: /local/galaxy_fit3/faces/face_49.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Detailed dashboard'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Detailed dashboard'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Digital
+        image: /local/galaxy_fit3/faces/face_104.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Digital'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Digital heart
+        image: /local/galaxy_fit3/faces/face_5.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Digital heart'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Digital heart'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Dissolving digital
+        image: /local/galaxy_fit3/faces/face_123.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Dissolving digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Dissolving digital'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Dot pattern
+        image: /local/galaxy_fit3/faces/face_107.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Dot pattern'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Dot pattern'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Dreamy depth
+        image: /local/galaxy_fit3/faces/face_64.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Dreamy depth'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Dreamy depth'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Dynamic digital
+        image: /local/galaxy_fit3/faces/face_22.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Dynamic digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Dynamic digital'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Elegant
+        image: /local/galaxy_fit3/faces/face_93.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Elegant'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Elegant'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Equalizer
+        image: /local/galaxy_fit3/faces/face_61.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Equalizer'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Equalizer'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Fitness pro 1
+        image: /local/galaxy_fit3/faces/face_102.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Fitness pro 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Fitness pro 1'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Fitness pro 2
+        image: /local/galaxy_fit3/faces/face_105.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Fitness pro 2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Fitness pro 2'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Fitness pro 3
+        image: /local/galaxy_fit3/faces/face_106.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Fitness pro 3'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Fitness pro 3'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Floating silk
+        image: /local/galaxy_fit3/faces/face_116.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Floating silk'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Floating silk'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Flower
+        image: /local/galaxy_fit3/faces/face_33.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Flower'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Flower'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Four rings
+        image: /local/galaxy_fit3/faces/face_76.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Four rings'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Four rings'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Fresh
+        image: /local/galaxy_fit3/faces/face_27.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Fresh'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Fresh'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Hanging ribbons
+        image: /local/galaxy_fit3/faces/face_114.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Hanging ribbons'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Hanging ribbons'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Info 1
+        image: /local/galaxy_fit3/faces/face_7.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Info 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Info 1'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Info 2
+        image: /local/galaxy_fit3/faces/face_8.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Info 2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Info 2'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Info 3
+        image: /local/galaxy_fit3/faces/face_9.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Info 3'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Info 3'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Info 4
+        image: /local/galaxy_fit3/faces/face_6.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Info 4'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Info 4'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Info 5
+        image: /local/galaxy_fit3/faces/face_10.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Info 5'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Info 5'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Info brick
+        image: /local/galaxy_fit3/faces/face_28.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Info brick'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Info brick'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Ink butterfly
+        image: /local/galaxy_fit3/faces/face_83.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Ink butterfly'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Ink butterfly'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Intrepid
+        image: /local/galaxy_fit3/faces/face_26.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Intrepid'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Intrepid'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Landscape painting
+        image: /local/galaxy_fit3/faces/face_35.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Landscape painting'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Landscape painting'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Large
+        image: /local/galaxy_fit3/faces/face_18.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Large'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Large'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Layered circles
+        image: /local/galaxy_fit3/faces/face_2.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Layered circles'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Layered circles'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Linked circles
+        image: /local/galaxy_fit3/faces/face_87.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Linked circles'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Linked circles'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Minimalist
+        image: /local/galaxy_fit3/faces/face_46.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Minimalist'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Minimalist'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Minimalist analog
+        image: /local/galaxy_fit3/faces/face_115.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Minimalist analog'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Minimalist analog'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Mirror digital
+        image: /local/galaxy_fit3/faces/face_70.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Mirror digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Mirror digital'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Mirrored curves
+        image: /local/galaxy_fit3/faces/face_47.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Mirrored curves'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Mirrored curves'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Modern life
+        image: /local/galaxy_fit3/faces/face_80.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Modern life'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Modern life'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Modern Minimalist
+        image: /local/galaxy_fit3/faces/face_30.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Modern Minimalist'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Modern Minimalist'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Mountain scape
+        image: /local/galaxy_fit3/faces/face_122.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Mountain scape'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Mountain scape'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Multiplex digital
+        image: /local/galaxy_fit3/faces/face_111.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Multiplex digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Multiplex digital'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Panel gradient
+        image: /local/galaxy_fit3/faces/face_113.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Panel gradient'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Panel gradient'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Partial ring
+        image: /local/galaxy_fit3/faces/face_51.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Partial ring'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Partial ring'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Passing note
+        image: /local/galaxy_fit3/faces/face_94.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Passing note'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Passing note'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Peaceful peak
+        image: /local/galaxy_fit3/faces/face_92.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Peaceful peak'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Peaceful peak'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Pencil time
+        image: /local/galaxy_fit3/faces/face_57.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Pencil time'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Pencil time'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Photos
+        image: https://img.samsungapps.com/productNew/000007235129/IconImage_20250305062925689_NEW_WAP_ICON_146_146.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Photos'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Photos'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Progress gauge 1
+        image: /local/galaxy_fit3/faces/face_16.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Progress gauge 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Progress gauge 1'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Progress gauge 2
+        image: /local/galaxy_fit3/faces/face_23.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Progress gauge 2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Progress gauge 2'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Puzzle time
+        image: /local/galaxy_fit3/faces/face_96.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Puzzle time'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Puzzle time'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Retro
+        image: /local/galaxy_fit3/faces/face_60.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Retro'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Retro'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Roaming Clock
+        image: /local/galaxy_fit3/faces/face_100.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Roaming Clock'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Roaming Clock'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Rounded
+        image: /local/galaxy_fit3/faces/face_78.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Rounded'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Rounded'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Sand dune
+        image: /local/galaxy_fit3/faces/face_39.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Sand dune'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Sand dune'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Shifting scale
+        image: /local/galaxy_fit3/faces/face_74.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Shifting scale'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Shifting scale'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Simple
+        image: /local/galaxy_fit3/faces/face_17.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Simple'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Simple'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Simple analog
+        image: /local/galaxy_fit3/faces/face_29.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Simple analog'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Simple analog'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Simple Classic
+        image: /local/galaxy_fit3/faces/face_32.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Simple Classic'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Simple Classic'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Simple data
+        image: /local/galaxy_fit3/faces/face_48.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Simple data'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Simple data'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Spiral
+        image: /local/galaxy_fit3/faces/face_119.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Spiral'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Spiral'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Spring ducks
+        image: /local/galaxy_fit3/faces/face_36.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Spring ducks'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Spring ducks'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Square hours
+        image: /local/galaxy_fit3/faces/face_99.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Square hours'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Square hours'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Staggered blocks
+        image: /local/galaxy_fit3/faces/face_50.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Staggered blocks'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Staggered blocks'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Starburst
+        image: /local/galaxy_fit3/faces/face_109.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Starburst'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Starburst'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Step count
+        image: /local/galaxy_fit3/faces/face_108.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Step count'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Step count'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Step streak
+        image: /local/galaxy_fit3/faces/face_79.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Step streak'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Step streak'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Stylish gradient
+        image: /local/galaxy_fit3/faces/face_68.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Stylish gradient'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Stylish gradient'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Summer beach
+        image: /local/galaxy_fit3/faces/face_44.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Summer beach'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Summer beach'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Three rings
+        image: /local/galaxy_fit3/faces/face_69.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Three rings'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Three rings'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Time frame
+        image: /local/galaxy_fit3/faces/face_72.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Time frame'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Time frame'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Tracker 1
+        image: /local/galaxy_fit3/faces/face_15.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Tracker 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Tracker 1'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Tracker2
+        image: /local/galaxy_fit3/faces/face_4.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Tracker2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Tracker2'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Triple subdial
+        image: /local/galaxy_fit3/faces/face_58.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Triple subdial'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Triple subdial'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Vintage record
+        image: /local/galaxy_fit3/faces/face_81.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Vintage record'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Vintage record'') }}'
+    - type: custom:streamline-card
+      template: fit3_face
+      variables:
+        name: Wish
+        image: /local/galaxy_fit3/faces/face_13.png
+      grid_options:
+        columns: 3
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ ''Wish'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) and not is_state(''select.galaxy_fit3_watch_face'', ''Wish'') }}'
+  - type: grid
+    cards:
+    - type: heading
+      heading: Add a face
+      icon: mdi:storefront-outline
+    - type: shortcut
+      label: Browse the face store
+      icon: mdi:storefront-outline
+      tap_action:
+        action: navigate
+        navigation_path: /lovelace/galaxy-fit3-store
+      grid_options:
+        columns: 12
+        rows: 1
+    - type: tile
+      entity: sensor.galaxy_fit3_face_install
+      name: Install
+      vertical: false
+      state_content: &id002
+      - state
+      - face
+      - progress
+      grid_options:
+        columns: 12
+        rows: 1
+  - type: grid
+    cards:
+    - type: heading
+      heading: Health
+      icon: mdi:heart-pulse
+    - type: tile
+      entity: sensor.galaxy_fit3_heart_rate
+      name: Heart rate
+      vertical: false
+      features: &id001
+      - type: trend-graph
+        hours_to_show: 24
+      grid_options:
+        columns: 6
+        rows: 2
+    - type: tile
+      entity: sensor.galaxy_fit3_steps
+      name: Steps today
+      vertical: false
+      features: *id001
+      grid_options:
+        columns: 6
+        rows: 2
+    - type: statistics-graph
+      title: Heart rate, last 7 days (hourly)
+      entities:
+      - entity: galaxy_fit3:heart_rate
+        name: Heart rate
+      stat_types:
+      - mean
+      - min
+      - max
+      period: hour
+      days_to_show: 7
+      chart_type: line
+      grid_options:
+        columns: full
+        rows: 5
+    - type: statistics-graph
+      title: Steps per day
+      entities:
+      - entity: sensor.galaxy_fit3_steps
+        name: Steps
+      stat_types:
+      - max
+      period: day
+      days_to_show: 14
+      chart_type: bar
+      grid_options:
+        columns: full
+        rows: 4
+    - type: markdown
+      text_only: true
+      grid_options:
+        columns: full
+        rows: auto
+      content: '<small>Last reading from the watch: {{ state_attr(''sensor.galaxy_fit3_heart_rate'', ''last_seen'') | as_datetime | as_local | relative_time if state_attr(''sensor.galaxy_fit3_heart_rate'', ''last_seen'') else ''not yet'' }} ago. {{ state_attr(''sensor.galaxy_fit3_heart_rate'', ''stored_records'') or 0 }} heart-rate readings stored.</small>'
+- title: Face store
+  path: galaxy-fit3-store
+  icon: mdi:storefront-outline
+  type: sections
+  subview: true
+  back_path: /lovelace/galaxy-fit3
+  max_columns: 4
+  sections:
+  - type: grid
+    column_span: 4
+    cards:
+    - type: heading
+      heading: Galaxy Fit3 face store
+      icon: mdi:storefront-outline
+    - type: markdown
+      text_only: true
+      grid_options:
+        columns: full
+        rows: auto
+      content: '<small>Every free face in Samsung''s store that is not on the watch yet. Tap one to install it: it takes about a minute, keep the watch near Home Assistant. When it is done it moves to the Watch face card.</small>'
+    - type: tile
+      entity: sensor.galaxy_fit3_face_install
+      name: Install
+      vertical: false
+      state_content: *id002
+      grid_options:
+        columns: full
+        rows: 1
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: 3D time
+        id: 77
+        image: /local/galaxy_fit3/faces/face_77.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''3D time'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Active
+        id: 21
+        image: /local/galaxy_fit3/faces/face_21.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Active'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Activity arc
+        id: 43
+        image: /local/galaxy_fit3/faces/face_43.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Activity arc'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Activity bars
+        id: 89
+        image: /local/galaxy_fit3/faces/face_89.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Activity bars'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Activity lanes
+        id: 124
+        image: /local/galaxy_fit3/faces/face_124.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Activity lanes'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Analog 1
+        id: 1
+        image: /local/galaxy_fit3/faces/face_1.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Analog 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Analog 2
+        id: 20
+        image: /local/galaxy_fit3/faces/face_20.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Analog 2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Analog 3
+        id: 101
+        image: /local/galaxy_fit3/faces/face_101.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Analog 3'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Angled info
+        id: 66
+        image: /local/galaxy_fit3/faces/face_66.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Angled info'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Animals
+        id: 25
+        image: /local/galaxy_fit3/faces/face_25.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Animals'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Basic clock
+        id: 38
+        image: /local/galaxy_fit3/faces/face_38.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Basic clock'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Basic dashboard
+        id: 3
+        image: /local/galaxy_fit3/faces/face_3.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Basic dashboard'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Beach sunset
+        id: 97
+        image: /local/galaxy_fit3/faces/face_97.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Beach sunset'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Big hours
+        id: 110
+        image: /local/galaxy_fit3/faces/face_110.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Big hours'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Big info
+        id: 11
+        image: /local/galaxy_fit3/faces/face_11.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Big info'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Big Time
+        id: 19
+        image: /local/galaxy_fit3/faces/face_19.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Big Time'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Black and white
+        id: 112
+        image: /local/galaxy_fit3/faces/face_112.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Black and white'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Blending colors
+        id: 59
+        image: /local/galaxy_fit3/faces/face_59.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Blending colors'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Candy companions
+        id: 118
+        image: /local/galaxy_fit3/faces/face_118.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Candy companions'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Casual Minimalist
+        id: 31
+        image: https://img.samsungapps.com/productNew/000007216046/IconImage_20250305225123714_NEW_WAP_ICON_146_146.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Casual Minimalist'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Charged up
+        id: 117
+        image: /local/galaxy_fit3/faces/face_117.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Charged up'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Classic clock
+        id: 71
+        image: /local/galaxy_fit3/faces/face_71.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Classic clock'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Classic digital
+        id: 120
+        image: /local/galaxy_fit3/faces/face_120.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Classic digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Color duo
+        id: 12
+        image: /local/galaxy_fit3/faces/face_12.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Color duo'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Color Pie
+        id: 34
+        image: /local/galaxy_fit3/faces/face_34.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Color Pie'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Colorbands
+        id: 103
+        image: /local/galaxy_fit3/faces/face_103.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Colorbands'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Cosmic city
+        id: 121
+        image: /local/galaxy_fit3/faces/face_121.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Cosmic city'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Cute character
+        id: 24
+        image: /local/galaxy_fit3/faces/face_24.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Cute character'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Date window
+        id: 14
+        image: /local/galaxy_fit3/faces/face_14.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Date window'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Detailed dashboard
+        id: 49
+        image: /local/galaxy_fit3/faces/face_49.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Detailed dashboard'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Digital
+        id: 104
+        image: /local/galaxy_fit3/faces/face_104.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Digital heart
+        id: 5
+        image: /local/galaxy_fit3/faces/face_5.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Digital heart'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Dissolving digital
+        id: 123
+        image: /local/galaxy_fit3/faces/face_123.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Dissolving digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Dot pattern
+        id: 107
+        image: /local/galaxy_fit3/faces/face_107.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Dot pattern'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Dreamy depth
+        id: 64
+        image: /local/galaxy_fit3/faces/face_64.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Dreamy depth'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Dynamic digital
+        id: 22
+        image: /local/galaxy_fit3/faces/face_22.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Dynamic digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Elegant
+        id: 93
+        image: /local/galaxy_fit3/faces/face_93.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Elegant'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Equalizer
+        id: 61
+        image: /local/galaxy_fit3/faces/face_61.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Equalizer'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Fitness pro 1
+        id: 102
+        image: /local/galaxy_fit3/faces/face_102.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Fitness pro 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Fitness pro 2
+        id: 105
+        image: /local/galaxy_fit3/faces/face_105.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Fitness pro 2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Fitness pro 3
+        id: 106
+        image: /local/galaxy_fit3/faces/face_106.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Fitness pro 3'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Floating silk
+        id: 116
+        image: /local/galaxy_fit3/faces/face_116.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Floating silk'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Flower
+        id: 33
+        image: /local/galaxy_fit3/faces/face_33.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Flower'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Four rings
+        id: 76
+        image: /local/galaxy_fit3/faces/face_76.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Four rings'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Fresh
+        id: 27
+        image: /local/galaxy_fit3/faces/face_27.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Fresh'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Hanging ribbons
+        id: 114
+        image: /local/galaxy_fit3/faces/face_114.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Hanging ribbons'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Info 1
+        id: 7
+        image: /local/galaxy_fit3/faces/face_7.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Info 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Info 2
+        id: 8
+        image: /local/galaxy_fit3/faces/face_8.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Info 2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Info 3
+        id: 9
+        image: /local/galaxy_fit3/faces/face_9.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Info 3'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Info 4
+        id: 6
+        image: /local/galaxy_fit3/faces/face_6.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Info 4'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Info 5
+        id: 10
+        image: /local/galaxy_fit3/faces/face_10.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Info 5'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Info brick
+        id: 28
+        image: /local/galaxy_fit3/faces/face_28.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Info brick'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Ink butterfly
+        id: 83
+        image: /local/galaxy_fit3/faces/face_83.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Ink butterfly'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Intrepid
+        id: 26
+        image: /local/galaxy_fit3/faces/face_26.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Intrepid'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Landscape painting
+        id: 35
+        image: /local/galaxy_fit3/faces/face_35.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Landscape painting'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Large
+        id: 18
+        image: /local/galaxy_fit3/faces/face_18.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Large'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Layered circles
+        id: 2
+        image: /local/galaxy_fit3/faces/face_2.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Layered circles'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Linked circles
+        id: 87
+        image: /local/galaxy_fit3/faces/face_87.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Linked circles'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Minimalist
+        id: 46
+        image: /local/galaxy_fit3/faces/face_46.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Minimalist'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Minimalist analog
+        id: 115
+        image: /local/galaxy_fit3/faces/face_115.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Minimalist analog'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Mirror digital
+        id: 70
+        image: /local/galaxy_fit3/faces/face_70.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Mirror digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Mirrored curves
+        id: 47
+        image: /local/galaxy_fit3/faces/face_47.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Mirrored curves'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Modern life
+        id: 80
+        image: /local/galaxy_fit3/faces/face_80.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Modern life'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Modern Minimalist
+        id: 30
+        image: /local/galaxy_fit3/faces/face_30.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Modern Minimalist'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Mountain scape
+        id: 122
+        image: /local/galaxy_fit3/faces/face_122.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Mountain scape'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Multiplex digital
+        id: 111
+        image: /local/galaxy_fit3/faces/face_111.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Multiplex digital'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Panel gradient
+        id: 113
+        image: /local/galaxy_fit3/faces/face_113.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Panel gradient'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Partial ring
+        id: 51
+        image: /local/galaxy_fit3/faces/face_51.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Partial ring'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Passing note
+        id: 94
+        image: /local/galaxy_fit3/faces/face_94.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Passing note'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Peaceful peak
+        id: 92
+        image: /local/galaxy_fit3/faces/face_92.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Peaceful peak'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Pencil time
+        id: 57
+        image: /local/galaxy_fit3/faces/face_57.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Pencil time'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Photos
+        id: 254
+        image: https://img.samsungapps.com/productNew/000007235129/IconImage_20250305062925689_NEW_WAP_ICON_146_146.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Photos'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Progress gauge 1
+        id: 16
+        image: /local/galaxy_fit3/faces/face_16.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Progress gauge 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Progress gauge 2
+        id: 23
+        image: /local/galaxy_fit3/faces/face_23.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Progress gauge 2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Puzzle time
+        id: 96
+        image: /local/galaxy_fit3/faces/face_96.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Puzzle time'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Retro
+        id: 60
+        image: /local/galaxy_fit3/faces/face_60.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Retro'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Roaming Clock
+        id: 100
+        image: /local/galaxy_fit3/faces/face_100.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Roaming Clock'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Rounded
+        id: 78
+        image: /local/galaxy_fit3/faces/face_78.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Rounded'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Sand dune
+        id: 39
+        image: /local/galaxy_fit3/faces/face_39.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Sand dune'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Shifting scale
+        id: 74
+        image: /local/galaxy_fit3/faces/face_74.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Shifting scale'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Simple
+        id: 17
+        image: /local/galaxy_fit3/faces/face_17.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Simple'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Simple analog
+        id: 29
+        image: /local/galaxy_fit3/faces/face_29.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Simple analog'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Simple Classic
+        id: 32
+        image: /local/galaxy_fit3/faces/face_32.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Simple Classic'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Simple data
+        id: 48
+        image: /local/galaxy_fit3/faces/face_48.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Simple data'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Spiral
+        id: 119
+        image: /local/galaxy_fit3/faces/face_119.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Spiral'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Spring ducks
+        id: 36
+        image: /local/galaxy_fit3/faces/face_36.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Spring ducks'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Square hours
+        id: 99
+        image: /local/galaxy_fit3/faces/face_99.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Square hours'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Staggered blocks
+        id: 50
+        image: /local/galaxy_fit3/faces/face_50.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Staggered blocks'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Starburst
+        id: 109
+        image: /local/galaxy_fit3/faces/face_109.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Starburst'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Step count
+        id: 108
+        image: /local/galaxy_fit3/faces/face_108.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Step count'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Step streak
+        id: 79
+        image: /local/galaxy_fit3/faces/face_79.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Step streak'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Stylish gradient
+        id: 68
+        image: /local/galaxy_fit3/faces/face_68.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Stylish gradient'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Summer beach
+        id: 44
+        image: /local/galaxy_fit3/faces/face_44.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Summer beach'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Three rings
+        id: 69
+        image: /local/galaxy_fit3/faces/face_69.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Three rings'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Time frame
+        id: 72
+        image: /local/galaxy_fit3/faces/face_72.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Time frame'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Tracker 1
+        id: 15
+        image: /local/galaxy_fit3/faces/face_15.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Tracker 1'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Tracker2
+        id: 4
+        image: /local/galaxy_fit3/faces/face_4.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Tracker2'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Triple subdial
+        id: 58
+        image: /local/galaxy_fit3/faces/face_58.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Triple subdial'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Vintage record
+        id: 81
+        image: /local/galaxy_fit3/faces/face_81.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Vintage record'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
+    - type: custom:streamline-card
+      template: fit3_store_face
+      variables:
+        name: Wish
+        id: 13
+        image: /local/galaxy_fit3/faces/face_13.png
+      grid_options:
+        columns: 4
+        rows: auto
+      visibility:
+      - condition: template
+        value_template: '{{ not ''Wish'' in (state_attr(''select.galaxy_fit3_watch_face'', ''options'') or []) }}'
