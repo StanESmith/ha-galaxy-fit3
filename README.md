@@ -231,27 +231,55 @@ The BLE pipe: service `00001a1a-0000-1000-8000-00805f9b34fb`, write characterist
 custom_components/galaxy_fit3/   the integration
   sap/                           SAP protocol stack (pure Python)
   face_store.py  store_catalog.py   Samsung store catalogue, face downloads, preview pictures
+  brand/                         the integration's icon, shown by Home Assistant 2026.3 and newer
 scripts/
   fetch_store_faces.py   list the store, download face packages, extract preview pictures
   build_dashboard.py     generate the dashboard (face grid + Face store page)
+  make_brand_images.py   draw the icon (original artwork; needs Pillow)
+  release_check.py       check a release tag against the manifest and the changelog
 examples/                the generated dashboard, for a device named "Galaxy Fit3"
-tests/                   unit tests
+tests/                   unit tests: no Home Assistant needed
+tests_ha/                integration tests inside the real Home Assistant core
+CHANGELOG.md             release notes, one section per version
 ```
+
+### Tests
+
+Two suites, run in separate processes: the unit tests install stand-in `homeassistant` modules, which would
+get in the way of the real one.
 
 ```bash
+# unit tests: the protocol codec, the client against a fake watch, the config-flow state machine
 uv venv --python 3.14
 uv pip install -r requirements-test.txt dbus-fast   # dbus-fast is optional: the pairing-agent tests skip without it
-.venv/bin/pytest
+dbus-run-session -- .venv/bin/pytest
+
+# Home Assistant tests: the real core (pytest-homeassistant-custom-component), a fake watch
+uv venv --python 3.14 .venv-ha
+uv pip install --python .venv-ha/bin/python -r tests_ha/requirements.txt
+.venv-ha/bin/python tests_ha/ha_requirements.py | uv pip install --python .venv-ha/bin/python -r -
+.venv-ha/bin/pytest tests_ha
 ```
 
-The tests need neither Home Assistant nor Bluetooth hardware: the protocol codec in `sap/` is imported
-directly, and `client.py` / `config_flow.py` run against a fake watch and stand-in modules. The
-pairing-agent tests need a D-Bus session bus, e.g. `dbus-run-session -- .venv/bin/pytest`.
+The Home Assistant tests set up the config entry, check the entities, translations and service
+descriptions, call the actions, and drive the config and options flows. The watch is replaced by an
+autospecced `GalaxyFit3Client`, which can only offer methods the real client has, so a renamed method
+fails the test. Bluetooth itself (BlueZ, bonding, the link) is not covered; that needs the hardware.
 
-After copying changed files into `custom_components/`, restart Home Assistant: reloading the config entry
-does not re-import changed Python modules.
+### Releasing
 
-**CI.** GitHub Actions (`.github/workflows/ci.yml`) runs the tests, hassfest and HACS validation.
+1. Raise `version` in `custom_components/galaxy_fit3/manifest.json` and fill in a `## [X.Y.Z]` section of
+   `CHANGELOG.md`.
+2. `python3 scripts/release_check.py vX.Y.Z` confirms the tag, manifest and changelog agree.
+3. Commit, then `git tag vX.Y.Z && git push origin vX.Y.Z`. The release workflow runs both test suites and
+   publishes the GitHub release with that changelog section as its notes; HACS then offers the update to
+   everyone who installed through it. A tag with a suffix (`v0.2.0-rc1`) is published as a pre-release.
+
+After copying changed files into `custom_components/` on your own system, restart Home Assistant: reloading
+the config entry does not re-import changed Python modules.
+
+**CI.** GitHub Actions (`.github/workflows/ci.yml`) runs the unit tests, the Home Assistant tests, hassfest
+and HACS validation, and `release.yml` publishes releases.
 
 ## Contributing
 

@@ -1,0 +1,58 @@
+name: Release
+
+# Push a tag like v0.2.0 to publish a release. HACS offers the new version to everyone who installed
+# the integration through it. Before tagging: bump "version" in custom_components/galaxy_fit3/manifest.json
+# and fill in the matching "## [0.2.0]" section of CHANGELOG.md; this workflow refuses the tag otherwise.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check the tag against the manifest and changelog
+        run: python3 scripts/release_check.py "$GITHUB_REF_NAME" --notes release-notes.md
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Run the unit tests
+        run: |
+          uv venv
+          uv pip install -r requirements-test.txt dbus-fast
+          if command -v dbus-run-session >/dev/null 2>&1; then
+            dbus-run-session -- .venv/bin/pytest -v
+          else
+            .venv/bin/pytest -v
+          fi
+
+      - name: Run the Home Assistant tests
+        run: |
+          uv venv --clear .venv-ha
+          uv pip install --python .venv-ha/bin/python -r tests_ha/requirements.txt
+          .venv-ha/bin/python tests_ha/ha_requirements.py | uv pip install --python .venv-ha/bin/python -r -
+          .venv-ha/bin/pytest tests_ha
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=""
+          case "$GITHUB_REF_NAME" in *-*) flags="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file release-notes.md $flags

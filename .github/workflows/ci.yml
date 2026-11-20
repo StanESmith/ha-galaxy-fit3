@@ -39,6 +39,32 @@ jobs:
             .venv/bin/pytest -v
           fi
 
+  ha-tests:
+    name: Home Assistant tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Install Home Assistant and the components the integration needs
+        run: |
+          uv venv
+          uv pip install -r tests_ha/requirements.txt
+          .venv/bin/python tests_ha/ha_requirements.py | uv pip install -r -
+
+      - name: Run the Home Assistant tests
+        run: .venv/bin/pytest tests_ha
+
   hassfest:
     name: HACS Validation (hassfest)
     runs-on: ubuntu-latest

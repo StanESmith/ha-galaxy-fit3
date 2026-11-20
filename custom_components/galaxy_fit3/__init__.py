@@ -213,7 +213,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if not call.data["wait"] and not call.data["handshake_only"]:
             # dashboards: return at once; the face-install sensor shows the progress
             coordinator.async_start_install(call.data["face_id"], call.data["style"])
-            return None
+            return {"started": True, "face_id": call.data["face_id"]}
         return await coordinator.async_install_face(call.data["face_id"], call.data["style"], call.data["handshake_only"])
 
     hass.services.async_register(

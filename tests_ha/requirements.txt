@@ -1,0 +1,9 @@
+# Test dependencies for the Home Assistant integration tests (tests_ha/). Install this, then the
+# requirements of the Home Assistant components the integration depends on:
+#
+#   uv pip install -r tests_ha/requirements.txt
+#   python tests_ha/ha_requirements.py | uv pip install -r -
+#
+# Unpinned on purpose: the plugin tracks Home Assistant releases, so CI notices when a new Home Assistant
+# breaks the integration.
+pytest-homeassistant-custom-component
