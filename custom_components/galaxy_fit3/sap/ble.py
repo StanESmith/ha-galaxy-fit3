@@ -175,15 +175,6 @@ class BleTransport:
                 pass
             await asyncio.wait_for(self._client.disconnect(), timeout=15)
 
-    def describe_gatt(self) -> list[str]:
-        """Diagnostics: one ``service / characteristic [properties]`` line per GATT characteristic."""
-        lines = []
-        for svc in self._client.services:
-            lines.append(f"service {svc.uuid}")
-            for ch in svc.characteristics:
-                lines.append(f"  char {ch.uuid} [{','.join(ch.properties)}]")
-        return lines
-
     async def write_char(self, uuid: str, data: bytes, response: bool = True) -> None:
         """Diagnostics: write an arbitrary GATT characteristic."""
         await self._client.write_gatt_char(uuid, data, response=response)

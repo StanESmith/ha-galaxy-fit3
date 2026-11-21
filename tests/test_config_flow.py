@@ -93,6 +93,13 @@ def _load():
     _stub("homeassistant.components.bluetooth", BluetoothServiceInfoBleak=object)
     _stub("homeassistant.config_entries", ConfigFlow=_FlowBase, ConfigFlowResult=dict, OptionsFlow=_FlowBase, ConfigEntry=object)
     _stub("homeassistant.core", HomeAssistant=object, callback=lambda f: f)
+    _stub("homeassistant.helpers")
+    _stub(
+        "homeassistant.helpers.selector",
+        NumberSelector=lambda config: config,
+        NumberSelectorConfig=lambda **kwargs: kwargs,
+        NumberSelectorMode=types.SimpleNamespace(BOX="box"),
+    )
     pkg = types.ModuleType("gf3f")
     pkg.__path__ = [str(_PKG_DIR)]
     sys.modules["gf3f"] = pkg

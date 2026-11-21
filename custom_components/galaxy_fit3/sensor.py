@@ -16,7 +16,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, EntityCategory
+from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfLength
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -31,7 +31,7 @@ from .coordinator import Fit3Coordinator
 class Fit3SensorDescription(SensorEntityDescription):
     """Describes a Fit3 sensor and how to read it from WatchStatus."""
 
-    value_fn: Callable[[WatchStatus], int | None]
+    value_fn: Callable[[WatchStatus], int | float | None]
 
 
 SENSORS: tuple[Fit3SensorDescription, ...] = (
@@ -58,6 +58,35 @@ SENSORS: tuple[Fit3SensorDescription, ...] = (
         icon="mdi:shoe-print",
         state_class=SensorStateClass.TOTAL_INCREASING,
         value_fn=lambda s: s.steps,
+    ),
+    Fit3SensorDescription(
+        key="calories",
+        translation_key="calories",
+        native_unit_of_measurement="kcal",
+        icon="mdi:fire",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        suggested_display_precision=0,
+        value_fn=lambda s: None if s.calories is None else round(s.calories, 1),
+    ),
+    Fit3SensorDescription(
+        key="distance",
+        translation_key="distance",
+        device_class=SensorDeviceClass.DISTANCE,
+        native_unit_of_measurement=UnitOfLength.METERS,
+        suggested_unit_of_measurement=UnitOfLength.KILOMETERS,
+        suggested_display_precision=2,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda s: None if s.distance is None else round(s.distance, 1),
+    ),
+    # The watch has not sent a resting heart rate in a week of data, so this stays off until you want it.
+    Fit3SensorDescription(
+        key="resting_heart_rate",
+        translation_key="resting_heart_rate",
+        native_unit_of_measurement="bpm",
+        icon="mdi:heart-outline",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=False,
+        value_fn=lambda s: s.resting_heart_rate,
     ),
 )
 

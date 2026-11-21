@@ -61,6 +61,11 @@ class HealthState:
     heart_rate_time: int | None = None  # Unix seconds of the newest heart-rate record
     # step-count records keyed by their start time (Unix seconds); re-sent records overwrite
     step_bins: dict[int, int] = field(default_factory=dict)
+    # the same records' calories (kcal) and distance (metres), by start time
+    step_calories: dict[int, float] = field(default_factory=dict)
+    step_distance: dict[int, float] = field(default_factory=dict)
+    resting_heart_rate: int | None = None  # newest heart-rate record tagged as a resting heart rate
+    resting_time: int | None = None
     # every heart-rate record the watch has sent, keyed by start time: (bpm, min, max, tag). Kept
     # for good (the integration persists them) so they can be graphed; re-sent records overwrite.
     hr_records: dict[int, tuple[int, int | None, int | None, int | None]] = field(default_factory=dict)
@@ -72,6 +77,8 @@ class HealthState:
         if data.op == healthsync.OP_SYNC_DATA:
             self.last_sync = healthsync.to_protocol_time(time.time())
         for hr in data.heart_rates:
+            if hr.bpm and hr.tag == healthsync.TAG_RESTING_HEART_RATE and (self.resting_time is None or (hr.start or 0) >= self.resting_time):
+                self.resting_heart_rate, self.resting_time = hr.bpm, hr.start or 0
             if hr.bpm and (self.heart_rate_time is None or (hr.start or 0) >= self.heart_rate_time):
                 self.heart_rate, self.heart_rate_time = hr.bpm, hr.start or 0
             if hr.bpm and hr.start is not None and heart_rate_history.is_plausible(hr.start):
@@ -82,9 +89,15 @@ class HealthState:
         for st in data.steps:
             if st.count is not None and st.start is not None:
                 self.step_bins[st.start] = st.count
+            if st.start is not None and st.calorie is not None:
+                self.step_calories[st.start] = st.calorie
+            if st.start is not None and st.distance is not None:
+                self.step_distance[st.start] = st.distance
         if len(self.step_bins) > 4096:  # keep the newest records only
-            for key in sorted(self.step_bins)[:-2048]:
-                del self.step_bins[key]
+            oldest = sorted(self.step_bins)[-2048]
+            for records in (self.step_bins, self.step_calories, self.step_distance):
+                for key in [key for key in records if key < oldest]:
+                    del records[key]
 
     def steps_since(self, unix_seconds: float) -> int | None:
         """Sum of the step records starting at or after ``unix_seconds``; ``None`` before any sync."""
@@ -92,12 +105,27 @@ class HealthState:
             return None
         return sum(n for start, n in self.step_bins.items() if start >= unix_seconds)
 
+    def calories_since(self, unix_seconds: float) -> float | None:
+        """Kilocalories of the step records starting at or after ``unix_seconds``; ``None`` if none carried any."""
+        if not self.step_calories:
+            return None
+        return sum(kcal for start, kcal in self.step_calories.items() if start >= unix_seconds)
+
+    def distance_since(self, unix_seconds: float) -> float | None:
+        """Metres of the step records starting at or after ``unix_seconds``; ``None`` if none carried any."""
+        if not self.step_distance:
+            return None
+        return sum(metres for start, metres in self.step_distance.items() if start >= unix_seconds)
+
 
 @dataclass(slots=True)
 class WatchStatus:
     battery_level: int | None = None
     heart_rate: int | None = None
-    steps: int | None = None
+    steps: int | None = None  # today
+    calories: float | None = None  # kcal, today
+    distance: float | None = None  # metres, today
+    resting_heart_rate: int | None = None
 
 
 class GalaxyFit3Client:
@@ -337,26 +365,6 @@ class GalaxyFit3Client:
         )
         return ok
 
-    def gatt_dump(self) -> list[str]:
-        """Diagnostics: log and return the connected watch's GATT services/characteristics."""
-        if not self._transport.is_connected:
-            raise NotConnected("not connected: call connect() first")
-        lines = self._transport.describe_gatt()
-        _LOGGER.warning("Fit3 %s: GATT dump:\n%s", self._address, "\n".join(lines))
-        return lines
-
-    async def write_current_time(self, local: "time.struct_time | None" = None) -> None:
-        """Diagnostics: write the standard BLE Current Time characteristic (0x2A2B), local time of the host."""
-        if not self._transport.is_connected:
-            raise NotConnected("not connected: call connect() first")
-        t = time.localtime() if local is None else local
-        data = (
-            t.tm_year.to_bytes(2, "little")
-            + bytes([t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_wday + 1, 0, 1])  # dow 1=Mon; manual update
-        )
-        _LOGGER.warning("Fit3 %s: writing Current Time 0x2A2B = %s", self._address, data.hex())
-        await self._transport.write_char("00002a2b-0000-1000-8000-00805f9b34fb", data, response=True)
-
     def set_skip_time_frame(self, skip: bool) -> None:
         """Diagnostics: from the next connect, leave the time frame out of the setup replay."""
         self._skip_time_frame = bool(skip)
@@ -437,11 +445,25 @@ class GalaxyFit3Client:
         """Newest heart rate the watch has pushed in a health sync (route 0a0a), if any."""
         return self._health.heart_rate
 
+    def _local_midnight(self) -> float:
+        now = time.time()
+        return now - (now + self._tz()[0]) % 86400
+
     async def read_steps(self) -> int | None:
         """Steps since local midnight, summed from the step-count records the watch has pushed."""
-        now = time.time()
-        midnight = now - (now + self._tz()[0]) % 86400
-        return self._health.steps_since(midnight)
+        return self._health.steps_since(self._local_midnight())
+
+    async def read_calories(self) -> float | None:
+        """Kilocalories since local midnight, from the same records."""
+        return self._health.calories_since(self._local_midnight())
+
+    async def read_distance(self) -> float | None:
+        """Metres walked since local midnight, from the same records."""
+        return self._health.distance_since(self._local_midnight())
+
+    async def read_resting_heart_rate(self) -> int | None:
+        """The newest resting heart rate the watch has sent (it has not sent one yet in a week of data)."""
+        return self._health.resting_heart_rate
 
     async def request_health_sync(self, kind: str = "request_data", window_days: int = 1) -> bool:
         """Ask the watch to sync its health records (experimental; the trigger is unverified).
@@ -590,7 +612,7 @@ class GalaxyFit3Client:
             session.close()
 
     async def read_status(self) -> WatchStatus:
-        """Aggregate battery / heart rate / steps for the coordinator (health stays gated)."""
+        """Aggregate the readings the coordinator publishes (battery, heart rate, the day's activity)."""
         status = WatchStatus()
         # Ask the watch for anything new since the last sync; the records arrive after this poll
         # returns and show up on the next one. A phone health app opens its syncs the same way.
@@ -604,6 +626,9 @@ class GalaxyFit3Client:
             ("battery_level", self.read_battery),
             ("heart_rate", self.read_heart_rate),
             ("steps", self.read_steps),
+            ("calories", self.read_calories),
+            ("distance", self.read_distance),
+            ("resting_heart_rate", self.read_resting_heart_rate),
         ):
             try:
                 setattr(status, name, await reader())

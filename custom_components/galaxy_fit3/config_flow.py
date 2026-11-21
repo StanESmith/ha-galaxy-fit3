@@ -20,10 +20,21 @@ import voluptuous as vol
 from homeassistant.components.bluetooth import BluetoothServiceInfoBleak
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import selector
 
 from . import ble_support
 from .bluez_agent import PairingAgent
-from .const import CONF_ADDRESS, CONF_IS_24H, CONF_NAME, DEFAULT_IS_24H, DOMAIN
+from .const import (
+    CONF_ADDRESS,
+    CONF_IS_24H,
+    CONF_NAME,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_IS_24H,
+    DEFAULT_SCAN_INTERVAL_MIN,
+    DOMAIN,
+    MAX_SCAN_INTERVAL_MIN,
+    MIN_SCAN_INTERVAL_MIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -229,9 +240,21 @@ class Fit3OptionsFlow(OptionsFlow):
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            data = {**user_input, CONF_SCAN_INTERVAL: int(user_input.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN))}
+            return self.async_create_entry(title="", data=data)
         current = self.config_entry.options.get(CONF_IS_24H, DEFAULT_IS_24H)
+        minutes = int(self.config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN))
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema({vol.Optional(CONF_IS_24H, default=current): bool}),
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(CONF_IS_24H, default=current): bool,
+                    vol.Optional(CONF_SCAN_INTERVAL, default=minutes): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=MIN_SCAN_INTERVAL_MIN, max=MAX_SCAN_INTERVAL_MIN, step=1,
+                            mode=selector.NumberSelectorMode.BOX, unit_of_measurement="min",
+                        )
+                    ),
+                }
+            ),
         )

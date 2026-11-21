@@ -50,6 +50,15 @@
           "installed": "Installed",
           "failed": "Failed"
         }
+      },
+      "calories": {
+        "name": "Calories"
+      },
+      "distance": {
+        "name": "Distance"
+      },
+      "resting_heart_rate": {
+        "name": "Resting heart rate"
       }
     },
     "select": {
@@ -68,38 +77,16 @@
   },
   "services": {
     "set_time": {
-      "name": "Set watch time",
-      "description": "Push the current time and timezone to the watch now (also done on every connect and hourly).",
+      "name": "Set time",
+      "description": "Set the watch's clock now: the time and the timezone offset, daylight saving included. The integration also does this on every connection and hourly.",
       "fields": {
         "is_24h": {
-          "name": "24-hour format",
-          "description": "Use 24-hour clock display on the watch."
+          "name": "24-hour clock",
+          "description": "Show the time in 24-hour format. Leave out to use the integration's 24-hour clock option."
         },
         "tz_offset_seconds": {
-          "name": "Time zone offset (seconds)",
-          "description": "Offset from UTC in seconds."
-        }
-      }
-    },
-    "set_time_rtc": {
-      "name": "Set watch time (settings channel, experimental)",
-      "description": "Diagnostics: send the phone's real set-time message on the settings channel (route 0b0b). Its byte layout is unconfirmed, so byte order and offset unit are selectable.",
-      "fields": {
-        "is_24h": {
-          "name": "24-hour format",
-          "description": "Use 24-hour clock display on the watch."
-        },
-        "tz_offset_seconds": {
-          "name": "Time zone offset (seconds)",
-          "description": "Offset from UTC in seconds (default: Home Assistant's zone)."
-        },
-        "byte_order": {
-          "name": "Byte order",
-          "description": "Byte order of the multi-byte fields."
-        },
-        "offset_unit": {
-          "name": "Offset unit",
-          "description": "Whether the offset field is in seconds or minutes."
+          "name": "UTC offset",
+          "description": "Offset from UTC in seconds. Leave out to use Home Assistant's timezone."
         }
       }
     },
@@ -166,6 +153,20 @@
           "description": "Face numbers to fetch. Leave empty for every face in the store."
         }
       }
+    },
+    "request_health_sync": {
+      "name": "Request health sync",
+      "description": "Experimental. Ask the watch for its health records now (normally they arrive on their own about every four minutes), to take a reading, or to report its status.",
+      "fields": {
+        "kind": {
+          "name": "What to ask",
+          "description": "request_data asks for the records, check_status asks the watch to report its status, measure_heart_rate asks it to take a heart-rate reading now."
+        },
+        "window_days": {
+          "name": "Days",
+          "description": "How many days of records to ask for (request_data only)."
+        }
+      }
     }
   },
   "options": {
@@ -173,10 +174,12 @@
       "init": {
         "title": "Galaxy Fit3 options",
         "data": {
-          "is_24h": "24-hour clock"
+          "is_24h": "24-hour clock",
+          "scan_interval": "Poll interval (minutes)"
         },
         "data_description": {
-          "is_24h": "Show time in 24-hour format (off = 12-hour). Applied on the next time sync."
+          "is_24h": "Show time in 24-hour format (off = 12-hour). Applied on the next time sync.",
+          "scan_interval": "How often to connect to the watch and read it while it is in range. Shorter gives fresher readings; longer leaves the Bluetooth adapter free for other devices."
         }
       }
     }

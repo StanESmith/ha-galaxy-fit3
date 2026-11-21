@@ -11,7 +11,10 @@ CONF_IS_24H = "is_24h"  # options flow: 24-hour clock (False = 12-hour)
 DEFAULT_IS_24H = False
 
 # Default polling cadence for status (battery/HR/steps) once the session is operational.
-DEFAULT_SCAN_INTERVAL_S = 300
+CONF_SCAN_INTERVAL = "scan_interval"  # options flow: minutes between polls
+DEFAULT_SCAN_INTERVAL_MIN = 5
+MIN_SCAN_INTERVAL_MIN, MAX_SCAN_INTERVAL_MIN = 1, 60
+DEFAULT_SCAN_INTERVAL_S = DEFAULT_SCAN_INTERVAL_MIN * 60
 
 # False: each poll connects, syncs and disconnects, so the host's Bluetooth adapter is free between
 # polls (a watch holding the link all day starved a second Bluetooth sensor, see the wiki note).

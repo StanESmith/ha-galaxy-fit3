@@ -7,6 +7,27 @@ which HACS shows when it offers the update.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-21
+
+### Added
+
+- Calories and distance sensors for the day, from the watch's step records.
+- A resting heart rate sensor, off by default: the watch has not sent a resting reading in a week of data.
+- Poll interval option (1 to 60 minutes, default 5) in the integration's options.
+- Diagnostics download, with the Bluetooth address left out.
+- Documented `forget_bond` and `request_health_sync` actions.
+
+### Changed
+
+- `set_time` now sends the settings-channel message the integration itself uses every hour, so the action
+  does what the documentation says. Its `variant` and `epoch_seconds` experiments are gone.
+
+### Removed
+
+- The integration no longer forces debug logging on: it was a leftover from the pairing work and filled
+  every user's log. Turn debug logging on from the integration's page when you want it.
+- The `set_time_rtc`, `gatt_dump` and `write_current_time` actions (diagnostic experiments).
+
 ## [0.2.0] - 2026-11-20
 
 ### Added

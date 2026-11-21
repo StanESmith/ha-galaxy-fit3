@@ -73,13 +73,21 @@ async def test_store_select_offers_every_store_face(hass, entity_registry) -> No
 
 
 async def test_services_are_registered(hass) -> None:
-    for service in ("set_time", "set_watch_face", "list_watch_faces", "install_watch_face", "reconnect"):
+    for service in ("set_time", "set_watch_face", "list_watch_faces", "install_watch_face", "reconnect",
+                    "forget_bond", "request_health_sync", "fetch_face_previews"):
         assert hass.services.has_service(DOMAIN, service), service
+
+
+async def test_the_diagnostic_experiments_are_no_longer_actions(hass) -> None:
+    for service in ("gatt_dump", "write_current_time", "set_time_rtc"):
+        assert not hass.services.has_service(DOMAIN, service), service
 
 
 async def test_service_descriptions_match_the_schemas(hass) -> None:
     descriptions = (await async_get_all_descriptions(hass))[DOMAIN]
     assert {"face_id", "style", "handshake_only", "wait"} <= set(descriptions["install_watch_face"]["fields"])
+    assert set(descriptions["set_time"]["fields"]) == {"is_24h", "tz_offset_seconds"}
+    assert {"kind", "window_days"} <= set(descriptions["request_health_sync"]["fields"])
     assert "face_id" in descriptions["set_watch_face"]["fields"]
 
 
@@ -107,3 +115,48 @@ async def test_set_watch_face_service_reaches_the_client(hass, client) -> None:
 async def test_a_service_fails_cleanly_when_the_watch_is_out_of_reach(hass) -> None:
     with pytest.raises(HomeAssistantError, match="not reachable"):
         await hass.services.async_call(DOMAIN, "set_watch_face", {"face_id": 16}, blocking=True)
+
+
+async def test_set_time_sends_the_settings_channel_message_with_the_clock_option(hass, client) -> None:
+    await hass.services.async_call(DOMAIN, "set_time", {}, blocking=True)
+    client.set_time_rtc.assert_awaited_once_with(is_24h=False, tz_offset_seconds=None)  # the option's default
+
+
+async def test_set_time_takes_explicit_values(hass, client) -> None:
+    await hass.services.async_call(DOMAIN, "set_time", {"is_24h": True, "tz_offset_seconds": -18000}, blocking=True)
+    client.set_time_rtc.assert_awaited_once_with(is_24h=True, tz_offset_seconds=-18000)
+
+
+async def test_set_time_reports_a_watch_that_does_not_acknowledge(hass, client) -> None:
+    client.set_time_rtc.return_value = False
+    with pytest.raises(HomeAssistantError, match="did not acknowledge"):
+        await hass.services.async_call(DOMAIN, "set_time", {}, blocking=True)
+
+
+async def test_request_health_sync_reaches_the_client(hass, client) -> None:
+    await hass.services.async_call(DOMAIN, "request_health_sync", {"kind": "measure_heart_rate"}, blocking=True)
+    client.request_health_sync.assert_awaited_once_with("measure_heart_rate", 1)
+
+
+async def test_the_new_readings_are_sensors(hass, entity_registry) -> None:
+    calories = hass.states.get(_entity_id(entity_registry, "sensor", "calories"))
+    assert calories.state == "123.5" and calories.attributes["unit_of_measurement"] == "kcal"
+    distance = hass.states.get(_entity_id(entity_registry, "sensor", "distance"))
+    assert distance.attributes["unit_of_measurement"] == "km"  # stored in metres, shown in kilometres
+    assert float(distance.state) == pytest.approx(2.3457, abs=0.01)
+
+
+async def test_the_resting_heart_rate_sensor_is_off_until_wanted(hass, entity_registry) -> None:
+    entity_id = _entity_id(entity_registry, "sensor", "resting_heart_rate")
+    assert entity_registry.async_get(entity_id).disabled_by is not None
+    assert hass.states.get(entity_id) is None
+
+
+async def test_polling_every_five_minutes_by_default_and_as_often_as_the_option_says(hass, integration) -> None:
+    from datetime import timedelta
+
+    coordinator = hass.data[DOMAIN][integration.entry_id]
+    assert coordinator.update_interval == timedelta(minutes=5)
+    hass.config_entries.async_update_entry(integration, options={"scan_interval": 10})
+    await hass.async_block_till_done()
+    assert coordinator.update_interval == timedelta(minutes=10)

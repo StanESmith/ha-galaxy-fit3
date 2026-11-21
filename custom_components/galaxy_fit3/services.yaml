@@ -2,7 +2,7 @@ set_time:
   fields:
     is_24h:
       example: true
-      default: true
+      required: false
       selector:
         boolean:
     tz_offset_seconds:
@@ -15,45 +15,6 @@ set_time:
           step: 1
           unit_of_measurement: s
           mode: box
-    variant:
-      default: standard
-      selector:
-        select:
-          options: [standard, tz_zero, local_epoch, millis, no_tz]
-    epoch_seconds:
-      required: false
-      selector:
-        number:
-          min: 1000000000
-          max: 9999999999
-          mode: box
-set_time_rtc:
-  fields:
-    is_24h:
-      example: true
-      default: true
-      selector:
-        boolean:
-    tz_offset_seconds:
-      example: -18000
-      required: false
-      selector:
-        number:
-          min: -43200
-          max: 50400
-          step: 1
-          unit_of_measurement: s
-          mode: box
-    byte_order:
-      default: little
-      selector:
-        select:
-          options: [big, little]
-    offset_unit:
-      default: seconds
-      selector:
-        select:
-          options: [seconds, minutes]
 reconnect:
   fields:
     replay_frames:
@@ -95,11 +56,6 @@ set_watch_face:
           mode: box
 list_watch_faces:
 forget_bond:
-gatt_dump:
-  fields: {}
-write_current_time:
-  fields: {}
-
 request_health_sync:
   fields:
     kind:

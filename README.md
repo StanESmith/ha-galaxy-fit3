@@ -23,8 +23,8 @@ no phone, no Samsung Health, no cloud.
 ## Features
 
 - **Battery** level and charging state.
-- **Heart rate** and **steps**, with heart-rate history kept as hourly long-term statistics (the watch
-  itself holds only about a day and a half).
+- **Heart rate**, **steps**, **calories** and **distance**, with heart-rate history kept as hourly
+  long-term statistics (the watch itself holds only about a day and a half).
 - **Clock sync**: the watch's time is set from Home Assistant.
 - **Watch faces**: switch between the faces on the watch, and install any of the ~100 free faces from
   Samsung's store.
@@ -74,6 +74,10 @@ cp -r custom_components/galaxy_fit3 /config/custom_components/
 The bond belongs to one Bluetooth adapter: after changing adapters, factory reset the watch and set it
 up again.
 
+**Options** (the integration's **Configure** button): the 24-hour clock, and the **poll interval** in minutes
+(default 5, from 1 to 60). Every poll connects to the watch, reads it and disconnects, so a longer interval
+leaves the Bluetooth adapter free for other devices.
+
 ## Entities
 
 `<device>` is `galaxy_fit3` for a device named "Galaxy Fit3".
@@ -83,6 +87,9 @@ up again.
 | `sensor.<device>_battery` | Battery level. |
 | `sensor.<device>_heart_rate` | Latest heart rate; also feeds the hourly statistic `galaxy_fit3:heart_rate`. Attributes `last_seen` and `stored_records`. |
 | `sensor.<device>_steps` | Steps today. |
+| `sensor.<device>_calories` | Kilocalories today, from the same records as the steps. |
+| `sensor.<device>_distance` | Distance walked today (the watch reports metres; shown in your unit system). |
+| `sensor.<device>_resting_heart_rate` | The newest resting heart rate the watch has sent. **Off by default:** in a week of data the watch sent none, so it may stay empty; turn it on under the entity's settings if you want to see. |
 | `select.<device>_watch_face` | The faces on the watch; pick one to switch. Its picture is the current face's preview. |
 | `select.<device>_store_face` | A face from Samsung's store, for the install button. |
 | `button.<device>_install_watch_face` | Installs the face chosen in the store select. |
@@ -96,8 +103,10 @@ up again.
 | `galaxy_fit3.set_watch_face` | Switch to a face that is already on the watch. |
 | `galaxy_fit3.fetch_face_previews` | Save the preview pictures of store faces for the dashboard (in the background). |
 | `galaxy_fit3.list_watch_faces` | Return the faces on the watch. |
-| `galaxy_fit3.set_time` | Set the watch's clock now. |
+| `galaxy_fit3.set_time` | Set the watch's clock now: the time and your timezone offset, daylight saving included. Done automatically on every connection and hourly. Optional `is_24h` and `tz_offset_seconds`. |
 | `galaxy_fit3.reconnect` | Drop and re-open the Bluetooth connection. |
+| `galaxy_fit3.forget_bond` | Remove Home Assistant's Bluetooth bond with the watch, so the next connection pairs again from scratch. Use it if the watch will not reconnect after a factory reset. |
+| `galaxy_fit3.request_health_sync` | Experimental. Ask the watch for its health records now, ask it to take a heart-rate reading (`kind: measure_heart_rate`), or to report its status. Records normally arrive on their own. |
 
 Every field is described in **Tools -> Actions**. Example:
 
@@ -195,12 +204,15 @@ logger:
     custom_components.galaxy_fit3: debug
 ```
 
-When opening an issue, include the log, but remove your watch's Bluetooth address from it.
+When opening an issue, include the log, but remove your watch's Bluetooth address from it. Better, attach the
+**diagnostics** file (the integration's page -> three dots -> **Download diagnostics**): it holds the link
+status, the readings, the faces and the install state, with the Bluetooth address left out.
 
 ## Known limitations
 
-- **Only battery, heart rate and steps are read.** The watch also records sleep, stress, SpO2 and
-  exercise; those are not decoded yet.
+- **Not everything the watch records is read.** Battery, heart rate, steps, calories and distance are. Sleep,
+  stress, SpO2 and exercise are not decoded yet. Calories and distance are taken from the watch's step
+  records and have not been checked against many days of its own display.
 - **Free store faces only.** Custom (non-store) faces cannot be installed.
 - **Polling, not streaming.** Every 5 minutes the integration connects, syncs, reads and disconnects; holding
   the link open interfered with a neighbouring Bluetooth sensor. The watch keeps about a day and a half of

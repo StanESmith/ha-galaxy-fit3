@@ -13,7 +13,14 @@ from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.galaxy_fit3.config_flow import CONF_SKIP_PAIRING
-from custom_components.galaxy_fit3.const import CONF_ADDRESS, CONF_IS_24H, CONF_NAME, DOMAIN
+from custom_components.galaxy_fit3.const import (
+    CONF_ADDRESS,
+    CONF_IS_24H,
+    CONF_NAME,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_SCAN_INTERVAL_MIN,
+    DOMAIN,
+)
 from custom_components.galaxy_fit3.sap.constants import PIPE_SERVICE
 
 from .conftest import ADDRESS
@@ -85,4 +92,17 @@ async def test_options_flow_sets_the_clock_format(hass) -> None:
     assert result["type"] is FlowResultType.FORM and result["step_id"] == "init"
     result = await hass.config_entries.options.async_configure(result["flow_id"], {CONF_IS_24H: True})
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.options == {CONF_IS_24H: True}
+    assert entry.options == {CONF_IS_24H: True, CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL_MIN}  # the default is kept
+
+
+async def test_options_flow_sets_the_poll_interval(hass) -> None:
+    entry = MockConfigEntry(domain=DOMAIN, unique_id=ADDRESS, data={CONF_ADDRESS: ADDRESS})
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {CONF_SCAN_INTERVAL: 10.0})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert entry.options[CONF_SCAN_INTERVAL] == 10 and isinstance(entry.options[CONF_SCAN_INTERVAL], int)
+    # out of range is refused by the form
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    with pytest.raises(Exception, match="scan_interval|range"):
+        await hass.config_entries.options.async_configure(result["flow_id"], {CONF_SCAN_INTERVAL: 120})

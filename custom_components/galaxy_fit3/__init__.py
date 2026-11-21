@@ -17,7 +17,7 @@ from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, Supp
 from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 
-from .const import DOMAIN
+from .const import CONF_IS_24H, DEFAULT_IS_24H, DOMAIN
 from .coordinator import Fit3Coordinator
 from .dashboard import async_setup_frontend
 from .sap.errors import NotConnected
@@ -26,25 +26,11 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.SELECT, Platform.BUTTON]
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
-DIAGNOSTIC_DEBUG = True
-
 SERVICE_SET_TIME = "set_time"
 SET_TIME_SCHEMA = vol.Schema(
     {
-        vol.Optional("is_24h", default=False): cv.boolean,
+        vol.Optional("is_24h"): cv.boolean,  # default: the 24-hour clock option
         vol.Optional("tz_offset_seconds"): vol.Coerce(int),  # default: Home Assistant's zone, DST included
-        vol.Optional("variant", default="standard"): vol.In(["standard", "tz_zero", "local_epoch", "millis", "no_tz"]),
-        vol.Optional("epoch_seconds"): vol.All(vol.Coerce(int), vol.Range(min=1_000_000_000, max=9_999_999_999)),
-    }
-)
-
-SERVICE_SET_TIME_RTC = "set_time_rtc"
-SET_TIME_RTC_SCHEMA = vol.Schema(
-    {
-        vol.Optional("is_24h", default=False): cv.boolean,
-        vol.Optional("tz_offset_seconds"): vol.Coerce(int),
-        vol.Optional("byte_order", default="little"): vol.In(["big", "little"]),
-        vol.Optional("offset_unit", default="seconds"): vol.In(["seconds", "minutes"]),
     }
 )
 
@@ -100,10 +86,6 @@ async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> Non
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Galaxy Fit3 from a config entry."""
-    if DIAGNOSTIC_DEBUG:
-        # Diagnostic phase: capture the per-frame trace from the very first connection after a
-        # restart (logger.set_level resets on every restart). Turn off once pairing is settled.
-        logging.getLogger(__package__).setLevel(logging.DEBUG)
     coordinator = Fit3Coordinator(hass, entry)
     await coordinator.async_load_history()
     # names and pictures for the face selects; never blocks setup (falls back to the cached copy)
@@ -127,48 +109,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_create_background_task(hass, coordinator.async_refresh(), "galaxy_fit3_first_refresh")
 
     async def _handle_set_time(call: ServiceCall) -> None:
+        # The settings-channel message the integration itself sends on every connect and hourly.
+        is_24h = call.data.get("is_24h", entry.options.get(CONF_IS_24H, DEFAULT_IS_24H))
         async with coordinator.watch_session() as client:
             try:
-                acked = await client.set_time(
-                    is_24h=call.data["is_24h"],
-                    tz_offset_seconds=call.data.get("tz_offset_seconds"),
-                    variant=call.data["variant"],
-                    epoch_seconds=call.data.get("epoch_seconds"),
-                )
+                acked = await client.set_time_rtc(is_24h=is_24h, tz_offset_seconds=call.data.get("tz_offset_seconds"))
             except (NotConnected, NotImplementedError) as err:
                 raise HomeAssistantError(_NOT_READY) from err
         if not acked:
-            raise HomeAssistantError("The watch did not acknowledge the time frame.")
-
-    async def _handle_set_time_rtc(call: ServiceCall) -> None:
-        async with coordinator.watch_session() as client:
-            try:
-                acked = await client.set_time_rtc(
-                    is_24h=call.data["is_24h"],
-                    tz_offset_seconds=call.data.get("tz_offset_seconds"),
-                    byte_order=call.data["byte_order"],
-                    offset_unit=call.data["offset_unit"],
-                )
-            except (NotConnected, NotImplementedError) as err:
-                raise HomeAssistantError(_NOT_READY) from err
-        if not acked:
-            raise HomeAssistantError("The watch did not acknowledge the settings-channel time message.")
-
-    async def _handle_gatt_dump(call: ServiceCall) -> None:
-        async with coordinator.watch_session() as client:
-            try:
-                client.gatt_dump()
-            except (NotConnected, NotImplementedError) as err:
-                raise HomeAssistantError(_NOT_READY) from err
-
-    async def _handle_write_current_time(call: ServiceCall) -> None:
-        async with coordinator.watch_session() as client:
-            try:
-                await client.write_current_time()
-            except (NotConnected, NotImplementedError) as err:
-                raise HomeAssistantError(_NOT_READY) from err
-            except Exception as err:  # noqa: BLE001 - diagnostic: surface the GATT error text
-                raise HomeAssistantError(f"Current Time write failed: {err}") from err
+            raise HomeAssistantError("The watch did not acknowledge the time message.")
 
     async def _handle_reconnect(call: ServiceCall) -> None:
         await coordinator.reconnect(call.data.get("replay_frames"), call.data["skip_time_frame"], call.data["fresh_pairing"])
@@ -204,13 +153,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.services.async_register(DOMAIN, SERVICE_FORGET_BOND, _handle_forget_bond)
     hass.services.async_register(DOMAIN, SERVICE_SET_TIME, _handle_set_time, schema=SET_TIME_SCHEMA)
-    hass.services.async_register(DOMAIN, SERVICE_SET_TIME_RTC, _handle_set_time_rtc, schema=SET_TIME_RTC_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_RECONNECT, _handle_reconnect, schema=RECONNECT_SCHEMA)
     hass.services.async_register(
         DOMAIN, SERVICE_REQUEST_HEALTH_SYNC, _handle_request_health_sync, schema=REQUEST_HEALTH_SYNC_SCHEMA
     )
-    hass.services.async_register(DOMAIN, "gatt_dump", _handle_gatt_dump)
-    hass.services.async_register(DOMAIN, "write_current_time", _handle_write_current_time)
     hass.services.async_register(
         DOMAIN, SERVICE_SET_WATCH_FACE, _handle_set_watch_face, schema=SET_WATCH_FACE_SCHEMA
     )
@@ -259,11 +205,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(entry.entry_id, None)
         if not hass.data[DOMAIN]:
             hass.services.async_remove(DOMAIN, SERVICE_SET_TIME)
-            hass.services.async_remove(DOMAIN, SERVICE_SET_TIME_RTC)
             hass.services.async_remove(DOMAIN, SERVICE_RECONNECT)
             hass.services.async_remove(DOMAIN, SERVICE_REQUEST_HEALTH_SYNC)
-            hass.services.async_remove(DOMAIN, "gatt_dump")
-            hass.services.async_remove(DOMAIN, "write_current_time")
             hass.services.async_remove(DOMAIN, SERVICE_SET_WATCH_FACE)
             hass.services.async_remove(DOMAIN, SERVICE_LIST_WATCH_FACES)
             hass.services.async_remove(DOMAIN, SERVICE_INSTALL_WATCH_FACE)

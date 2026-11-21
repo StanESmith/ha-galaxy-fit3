@@ -36,7 +36,8 @@ def client() -> AsyncMock:
     """A stand-in for the watch client that only has methods the real one has (autospec)."""
     fake = create_autospec(GalaxyFit3Client, instance=True)
     fake.is_connected = False
-    fake.read_status.return_value = WatchStatus(battery_level=64, heart_rate=75, steps=1234)
+    fake.read_status.return_value = WatchStatus(battery_level=64, heart_rate=75, steps=1234, calories=123.456, distance=2345.67)
+    fake.set_time_rtc.return_value = True
     fake.list_watch_faces.return_value = watch_faces(active=106)
     fake.set_watch_face.return_value = watch_faces(active=16)
     fake.heart_rate_records.return_value = {}

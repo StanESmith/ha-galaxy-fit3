@@ -199,6 +199,8 @@ class StepRecord:
     duration: int | None = None  # milliseconds
 
 
+TAG_RESTING_HEART_RATE = 21316  # a heart-rate record with this tag is a resting heart rate
+
 @dataclass(slots=True)
 class HeartRateRecord:
     start: int | None = None  # Unix seconds
@@ -207,7 +209,7 @@ class HeartRateRecord:
     bpm: int | None = None
     bpm_min: int | None = None
     bpm_max: int | None = None
-    tag: int | None = None  # 21316 marks a resting heart rate
+    tag: int | None = None  # TAG_RESTING_HEART_RATE marks a resting heart rate
 
 
 @dataclass(slots=True)

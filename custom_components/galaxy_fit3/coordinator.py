@@ -23,8 +23,9 @@ from .client import WatchStatus
 from .const import (
     CONF_ADDRESS,
     CONF_IS_24H,
+    CONF_SCAN_INTERVAL,
     DEFAULT_IS_24H,
-    DEFAULT_SCAN_INTERVAL_S,
+    DEFAULT_SCAN_INTERVAL_MIN,
     DOMAIN,
     HOLD_CONNECTION,
     STATUS_CONNECTED,
@@ -48,6 +49,11 @@ _WARN_AFTER_FAILS = 6  # single failed connects are routine at the edge of range
 HEART_RATE_STATISTIC_ID = f"{DOMAIN}:heart_rate"  # external statistic: hourly mean/min/max of the watch's records
 
 
+def poll_interval(entry: ConfigEntry) -> timedelta:
+    """How often to poll the watch while it is reachable: the option, in minutes."""
+    return timedelta(minutes=int(entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN)))
+
+
 class Fit3Coordinator(DataUpdateCoordinator[WatchStatus]):
     """Connect over BLE each poll and read battery (+ HR/steps once those are reachable).
 
@@ -61,7 +67,7 @@ class Fit3Coordinator(DataUpdateCoordinator[WatchStatus]):
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL_S),
+            update_interval=poll_interval(entry),
         )
         self.entry = entry
         self.address: str = entry.data[CONF_ADDRESS]
@@ -153,7 +159,9 @@ class Fit3Coordinator(DataUpdateCoordinator[WatchStatus]):
         _LOGGER.info("Fit3 %s: imported %d hourly heart-rate statistics (%d records stored)", self.address, len(stats), len(records))
 
     async def async_apply_options(self) -> None:
-        """Re-send the time with the current options now (called when the options flow saves)."""
+        """Apply the options now (called when the options flow saves): the poll interval, and the clock format."""
+        if self.status == STATUS_CONNECTED:  # while disconnected the retry back-off decides
+            self.update_interval = poll_interval(self.entry)
         if self._client.is_connected:
             try:
                 await self._client.set_time_rtc(is_24h=self.entry.options.get(CONF_IS_24H, DEFAULT_IS_24H))
@@ -507,7 +515,7 @@ class Fit3Coordinator(DataUpdateCoordinator[WatchStatus]):
             self.status = STATUS_CONNECTED
             self.last_seen = datetime.now(UTC)
             self._fail_streak = 0
-            self.update_interval = timedelta(seconds=DEFAULT_SCAN_INTERVAL_S)
+            self.update_interval = poll_interval(self.entry)
             _LOGGER.debug("Fit3 %s: status %s", self.address, status)
             try:  # a storage or recorder problem must not fail the poll
                 await self._save_heart_rate_history()
