@@ -73,7 +73,6 @@ SENSORS: tuple[Fit3SensorDescription, ...] = (
         translation_key="distance",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=UnitOfLength.METERS,
-        suggested_unit_of_measurement=UnitOfLength.KILOMETERS,
         suggested_display_precision=2,
         state_class=SensorStateClass.TOTAL_INCREASING,
         value_fn=lambda s: None if s.distance is None else round(s.distance, 1),
@@ -117,6 +116,17 @@ class Fit3Sensor(CoordinatorEntity[Fit3Coordinator], SensorEntity):
             model="Galaxy Fit3",
             name=coordinator.entry.title,
         )
+
+    @property
+    def suggested_unit_of_measurement(self) -> str | None:
+        """The distance is stored in metres; a new sensor is first shown in the unit the watch uses (km or miles).
+
+        Home Assistant only applies this when the entity is first registered, so a unit chosen on the entity
+        afterwards is kept.
+        """
+        if self.entity_description.key == "distance":
+            return UnitOfLength.MILES if self.coordinator.distance_unit() == "mi" else UnitOfLength.KILOMETERS
+        return super().suggested_unit_of_measurement
 
     @property
     def native_value(self) -> int | None:

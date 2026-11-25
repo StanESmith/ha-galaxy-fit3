@@ -85,6 +85,7 @@ def build_client(
     address: str,
     on_disconnect=None,
     is_24h_provider=None,
+    distance_unit_provider=None,
     route: routing.RouteHolder | None = None,
 ) -> GalaxyFit3Client:
     """A client that connects through HA's retry connector with the device HA discovered, which
@@ -108,6 +109,7 @@ def build_client(
         connector=_connect,
         tz_provider=_tz_provider(hass),
         is_24h_provider=is_24h_provider,
+        distance_unit_provider=distance_unit_provider,
     )
 
 

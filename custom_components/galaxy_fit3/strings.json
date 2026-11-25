@@ -167,6 +167,16 @@
           "description": "How many days of records to ask for (request_data only)."
         }
       }
+    },
+    "set_distance_unit": {
+      "name": "Set distance unit",
+      "description": "Set the unit the watch shows distances in, once. The distance unit option sets it on every connection and overrides this.",
+      "fields": {
+        "unit": {
+          "name": "Unit",
+          "description": "km or mi."
+        }
+      }
     }
   },
   "options": {
@@ -175,12 +185,23 @@
         "title": "Galaxy Fit3 options",
         "data": {
           "is_24h": "24-hour clock",
-          "scan_interval": "Poll interval (minutes)"
+          "scan_interval": "Poll interval (minutes)",
+          "distance_unit": "Distance unit on the watch"
         },
         "data_description": {
           "is_24h": "Show time in 24-hour format (off = 12-hour). Applied on the next time sync.",
-          "scan_interval": "How often to connect to the watch and read it while it is in range. Shorter gives fresher readings; longer leaves the Bluetooth adapter free for other devices."
+          "scan_interval": "How often to connect to the watch and read it while it is in range. Shorter gives fresher readings; longer leaves the Bluetooth adapter free for other devices.",
+          "distance_unit": "The unit the watch shows distances in. Follow Home Assistant uses miles when Home Assistant's unit system is US customary, otherwise kilometres. Sent to the watch on each connection."
         }
+      }
+    }
+  },
+  "selector": {
+    "distance_unit": {
+      "options": {
+        "auto": "Follow Home Assistant",
+        "km": "Kilometres",
+        "mi": "Miles"
       }
     }
   }

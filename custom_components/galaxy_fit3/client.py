@@ -141,6 +141,7 @@ class GalaxyFit3Client:
         connector=None,
         tz_provider=None,
         is_24h_provider=None,
+        distance_unit_provider=None,
         id_a: bytes | None = None,
         id_b: bytes | None = None,
     ) -> None:
@@ -150,6 +151,9 @@ class GalaxyFit3Client:
         self._tz_provider = tz_provider
         # () -> bool: the configured clock format, read whenever the time is sent (options flow).
         self._is_24h_provider = is_24h_provider
+        # () -> "km" | "mi" | None: the distance unit the watch should show (None = leave it alone).
+        self._distance_unit_provider = distance_unit_provider
+        self._profile_unit_sent: str | None = None  # the unit sent on this connection
         self._transport = transport or BleTransport(
             address, resolve_device=resolve_device, connector=connector
         )
@@ -242,6 +246,7 @@ class GalaxyFit3Client:
         self._reasm.reset()
         self._large.reset()
         self._health_ready = False
+        self._profile_unit_sent = None
         self._health_synced.clear()
         self._replies_sent.clear()
         loop = asyncio.get_running_loop()
@@ -464,6 +469,36 @@ class GalaxyFit3Client:
     async def read_resting_heart_rate(self) -> int | None:
         """The newest resting heart rate the watch has sent (it has not sent one yet in a week of data)."""
         return self._health.resting_heart_rate
+
+    def _wanted_distance_unit(self) -> str | None:
+        unit = self._distance_unit_provider() if self._distance_unit_provider else None
+        return unit if unit in healthsync.DISTANCE_UNITS else None
+
+    def _profile_block(self) -> bytes:
+        """The user-profile block for this sync: the distance unit, once per connection and whenever it
+        changes (empty when no unit is configured or the watch already has it)."""
+        unit = self._wanted_distance_unit()
+        if unit is None or unit == self._profile_unit_sent:
+            return b""
+        self._profile_unit_sent = unit
+        _LOGGER.debug("Fit3 %s: sending distance unit %s in the user profile", self._address, unit)
+        return healthsync.build_user_profile(unit, healthsync.to_protocol_time(time.time()))
+
+    async def set_distance_unit(self, unit: str) -> bool:
+        """Send the watch its distance unit (``km`` or ``mi``) now. Returns whether the watch ACKed the frame
+        at the transport level; whether it then shows the unit is checked on the watch."""
+        if unit not in healthsync.DISTANCE_UNITS:
+            raise ValueError(f"distance unit must be km or mi, not {unit!r}")
+        if not self._transport.is_connected:
+            raise NotConnected("not connected: call connect() first")
+        self._health_seq = (self._health_seq % 0x7FFF) + 1
+        profile = healthsync.build_user_profile(unit, healthsync.to_protocol_time(time.time()))
+        app = healthsync.build_mobile_sync_data(self._health_seq, self._health.last_sync, profile)
+        _LOGGER.debug("Fit3 %s: TX HEALTH distance unit %s app=%s", self._address, unit, app.hex())
+        acked = await self._send(healthsync.ROUTE_HEALTH, app, reactive.REPLY_CLASS)
+        if acked:
+            self._profile_unit_sent = unit
+        return acked
 
     async def request_health_sync(self, kind: str = "request_data", window_days: int = 1) -> bool:
         """Ask the watch to sync its health records (experimental; the trigger is unverified).
@@ -723,7 +758,9 @@ class GalaxyFit3Client:
         if op == healthsync.OP_REQUEST_DATA_RESPONSE:
             # stage two of a phone-started sync: our (empty) SYNC_DATA, after which the watch sends its own
             self._health_seq = (self._health_seq % 0x7FFF) + 1
-            self._health_send(healthsync.build_mobile_sync_data(self._health_seq, self._health.last_sync))
+            self._health_send(
+                healthsync.build_mobile_sync_data(self._health_seq, self._health.last_sync, self._profile_block())
+            )
         if (op & 0x3F) not in (2, 3):
             return
         try:

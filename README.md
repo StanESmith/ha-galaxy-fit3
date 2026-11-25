@@ -74,7 +74,7 @@ cp -r custom_components/galaxy_fit3 /config/custom_components/
 The bond belongs to one Bluetooth adapter: after changing adapters, factory reset the watch and set it
 up again.
 
-**Options** (the integration's **Configure** button): the 24-hour clock, and the **poll interval** in minutes
+**Options** (the integration's **Configure** button): the 24-hour clock, the **distance unit** the watch shows (follow Home Assistant, km or miles), and the **poll interval** in minutes
 (default 5, from 1 to 60). Every poll connects to the watch, reads it and disconnects, so a longer interval
 leaves the Bluetooth adapter free for other devices.
 
@@ -104,6 +104,7 @@ leaves the Bluetooth adapter free for other devices.
 | `galaxy_fit3.fetch_face_previews` | Save the preview pictures of store faces for the dashboard (in the background). |
 | `galaxy_fit3.list_watch_faces` | Return the faces on the watch. |
 | `galaxy_fit3.set_time` | Set the watch's clock now: the time and your timezone offset, daylight saving included. Done automatically on every connection and hourly. Optional `is_24h` and `tz_offset_seconds`. |
+| `galaxy_fit3.set_distance_unit` | Set the unit the watch shows distances in (`km` or `mi`) once. The *Distance unit* option does this on every connection and overrides it. |
 | `galaxy_fit3.reconnect` | Drop and re-open the Bluetooth connection. |
 | `galaxy_fit3.forget_bond` | Remove Home Assistant's Bluetooth bond with the watch, so the next connection pairs again from scratch. Use it if the watch will not reconnect after a factory reset. |
 | `galaxy_fit3.request_health_sync` | Experimental. Ask the watch for its health records now, ask it to take a heart-rate reading (`kind: measure_heart_rate`), or to report its status. Records normally arrive on their own. |

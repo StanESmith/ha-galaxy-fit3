@@ -9,6 +9,9 @@ CONF_NAME = "name"
 CONF_SAS_CONFIRMED = "sas_confirmed"
 CONF_IS_24H = "is_24h"  # options flow: 24-hour clock (False = 12-hour)
 DEFAULT_IS_24H = False
+CONF_DISTANCE_UNIT = "distance_unit"  # options flow: the unit the watch shows distances in
+DISTANCE_UNIT_AUTO = "auto"  # follow Home Assistant's unit system (miles for US customary, else km)
+DISTANCE_UNITS = ("km", "mi")
 
 # Default polling cadence for status (battery/HR/steps) once the session is operational.
 CONF_SCAN_INTERVAL = "scan_interval"  # options flow: minutes between polls

@@ -15,6 +15,16 @@ set_time:
           step: 1
           unit_of_measurement: s
           mode: box
+set_distance_unit:
+  fields:
+    unit:
+      example: mi
+      required: true
+      selector:
+        select:
+          options:
+            - km
+            - mi
 reconnect:
   fields:
     replay_frames:

@@ -34,6 +34,9 @@ SET_TIME_SCHEMA = vol.Schema(
     }
 )
 
+SERVICE_SET_DISTANCE_UNIT = "set_distance_unit"
+SET_DISTANCE_UNIT_SCHEMA = vol.Schema({vol.Required("unit"): vol.In(["km", "mi"])})
+
 SERVICE_RECONNECT = "reconnect"
 RECONNECT_SCHEMA = vol.Schema({vol.Optional("replay_frames"): vol.All(vol.Coerce(int), vol.Range(min=0, max=27)), vol.Optional("skip_time_frame", default=False): cv.boolean, vol.Optional("fresh_pairing", default=False): cv.boolean})
 
@@ -119,6 +122,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if not acked:
             raise HomeAssistantError("The watch did not acknowledge the time message.")
 
+    async def _handle_set_distance_unit(call: ServiceCall) -> None:
+        async with coordinator.watch_session() as client:
+            try:
+                acked = await client.set_distance_unit(call.data["unit"])
+            except (NotConnected, NotImplementedError) as err:
+                raise HomeAssistantError(_NOT_READY) from err
+        if not acked:
+            raise HomeAssistantError("The watch did not acknowledge the distance unit.")
+
     async def _handle_reconnect(call: ServiceCall) -> None:
         await coordinator.reconnect(call.data.get("replay_frames"), call.data["skip_time_frame"], call.data["fresh_pairing"])
 
@@ -153,6 +165,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.services.async_register(DOMAIN, SERVICE_FORGET_BOND, _handle_forget_bond)
     hass.services.async_register(DOMAIN, SERVICE_SET_TIME, _handle_set_time, schema=SET_TIME_SCHEMA)
+    hass.services.async_register(
+        DOMAIN, SERVICE_SET_DISTANCE_UNIT, _handle_set_distance_unit, schema=SET_DISTANCE_UNIT_SCHEMA
+    )
     hass.services.async_register(DOMAIN, SERVICE_RECONNECT, _handle_reconnect, schema=RECONNECT_SCHEMA)
     hass.services.async_register(
         DOMAIN, SERVICE_REQUEST_HEALTH_SYNC, _handle_request_health_sync, schema=REQUEST_HEALTH_SYNC_SCHEMA

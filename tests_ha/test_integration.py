@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
+import voluptuous as vol
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.service import async_get_all_descriptions
@@ -73,7 +74,7 @@ async def test_store_select_offers_every_store_face(hass, entity_registry) -> No
 
 
 async def test_services_are_registered(hass) -> None:
-    for service in ("set_time", "set_watch_face", "list_watch_faces", "install_watch_face", "reconnect",
+    for service in ("set_time", "set_distance_unit", "set_watch_face", "list_watch_faces", "install_watch_face", "reconnect",
                     "forget_bond", "request_health_sync", "fetch_face_previews"):
         assert hass.services.has_service(DOMAIN, service), service
 
@@ -160,3 +161,29 @@ async def test_polling_every_five_minutes_by_default_and_as_often_as_the_option_
     hass.config_entries.async_update_entry(integration, options={"scan_interval": 10})
     await hass.async_block_till_done()
     assert coordinator.update_interval == timedelta(minutes=10)
+
+
+async def test_set_distance_unit_sends_the_unit_to_the_watch(hass, client) -> None:
+    client.set_distance_unit.return_value = True
+    await hass.services.async_call(DOMAIN, "set_distance_unit", {"unit": "mi"}, blocking=True)
+    client.set_distance_unit.assert_awaited_once_with("mi")
+    with pytest.raises(vol.Invalid):
+        await hass.services.async_call(DOMAIN, "set_distance_unit", {"unit": "yd"}, blocking=True)
+
+
+async def test_set_distance_unit_reports_a_watch_that_does_not_acknowledge(hass, client) -> None:
+    client.set_distance_unit.return_value = False
+    with pytest.raises(HomeAssistantError):
+        await hass.services.async_call(DOMAIN, "set_distance_unit", {"unit": "km"}, blocking=True)
+
+
+async def test_the_watch_distance_unit_follows_the_option_or_home_assistant(hass, integration) -> None:
+    from homeassistant.util.unit_system import METRIC_SYSTEM, US_CUSTOMARY_SYSTEM
+
+    coordinator = hass.data[DOMAIN][integration.entry_id]
+    hass.config.units = METRIC_SYSTEM
+    assert coordinator.distance_unit() == "km"  # "auto" by default
+    hass.config.units = US_CUSTOMARY_SYSTEM
+    assert coordinator.distance_unit() == "mi"
+    hass.config_entries.async_update_entry(integration, options={"distance_unit": "km"})
+    assert coordinator.distance_unit() == "km"  # an explicit choice wins over the unit system

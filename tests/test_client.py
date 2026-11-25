@@ -13,6 +13,8 @@ import pathlib
 import sys
 import types
 
+import pytest
+
 _PKG_DIR = pathlib.Path(__file__).resolve().parents[1] / "custom_components" / "galaxy_fit3"
 
 
@@ -554,6 +556,43 @@ def test_status_poll_requests_a_health_sync_once_the_watch_has_asked_for_capabil
     quiet, asked = _run(scenario())
     assert quiet == [] and len(asked) == 1
     assert asked[0].app == hs.build_request_data(1, 0)
+
+
+def test_the_distance_unit_goes_in_the_phone_sync_once_per_connection() -> None:
+    hs = importlib.import_module("gf3.sap.healthsync")
+
+    async def scenario():
+        watch = FakeWatch()
+        cl = client_mod.GalaxyFit3Client("AA:BB:CC:DD:EE:FF", transport=watch, distance_unit_provider=lambda: "mi")
+        await cl.connect()
+        watch.push_app(hs.ROUTE_HEALTH, bytes.fromhex("a017e01527a001a10433") + bytes(20))
+        await asyncio.sleep(0.1)
+        for _ in range(2):  # two syncs: the watch answers each REQUEST_DATA
+            watch.push_app(hs.ROUTE_HEALTH, bytes.fromhex("43e0010004020101") + bytes(30))
+            await asyncio.sleep(0.1)
+        return [f.app for f in watch.app_frames() if f.route == hs.ROUTE_HEALTH and f.app[:1] == b"\x82"]
+
+    sent = _run(scenario())
+    assert len(sent) == 2
+    assert sent[0][1] == 0x03
+    assert sent[0].endswith(b"\x07\x02") and sent[1][1] == 0x02  # the second sync carries no profile
+
+
+def test_set_distance_unit_sends_a_profile_and_rejects_other_units() -> None:
+    hs = importlib.import_module("gf3.sap.healthsync")
+
+    async def scenario():
+        watch = FakeWatch()
+        cl = client_mod.GalaxyFit3Client("AA:BB:CC:DD:EE:FF", transport=watch)
+        await cl.connect()
+        ok = await cl.set_distance_unit("km")
+        with pytest.raises(ValueError):
+            await cl.set_distance_unit("yd")
+        return ok, [f.app for f in watch.app_frames() if f.route == hs.ROUTE_HEALTH]
+
+    ok, frames = _run(scenario())
+    assert ok and len(frames) == 1
+    assert frames[0][:2] == b"\x82\x03" and frames[0].endswith(b"\x07\x01")
 
 
 def test_sync_health_returns_once_the_watch_records_arrive_and_are_acknowledged() -> None:

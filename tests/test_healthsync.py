@@ -33,6 +33,23 @@ def test_builders_match_the_reference_serializer() -> None:
     assert hs.build_check_status(7) == R("0101e00700")
 
 
+def test_user_profile_sets_only_the_distance_unit() -> None:
+    # 0b <len> | 05 <update time> | <len entries> | 07 <1 km / 2 mi>   (createUserProfileByte, one entry)
+    km = hs.build_user_profile("km", T0)
+    mi = hs.build_user_profile("mi", T0)
+    assert mi == R("0b0b000000" "05c0317c32" "02000000" "0702")
+    assert km == mi[:-1] + b"\x01"
+    with pytest.raises(ValueError):
+        hs.build_user_profile("yd", T0)
+
+
+def test_mobile_sync_data_counts_the_profile_block() -> None:
+    di = "0519010002000003043304c0317c32050000000006000000000701"
+    profile = hs.build_user_profile("mi", T0)
+    assert hs.build_mobile_sync_data(8, T0, profile) == R("8203e00800" + di) + profile
+    assert hs.build_mobile_sync_data(8, T0) == R("8202e00800" + di)
+
+
 def test_on_demand_heart_rate_measure_matches_the_reference_serializer() -> None:
     assert hs.build_on_demand_measure(7) == R("04e00700198505024c270305031a090000008006810795e8039601")
 

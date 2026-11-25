@@ -26,11 +26,13 @@ from . import ble_support
 from .bluez_agent import PairingAgent
 from .const import (
     CONF_ADDRESS,
+    CONF_DISTANCE_UNIT,
     CONF_IS_24H,
     CONF_NAME,
     CONF_SCAN_INTERVAL,
     DEFAULT_IS_24H,
     DEFAULT_SCAN_INTERVAL_MIN,
+    DISTANCE_UNIT_AUTO,
     DOMAIN,
     MAX_SCAN_INTERVAL_MIN,
     MIN_SCAN_INTERVAL_MIN,
@@ -244,11 +246,19 @@ class Fit3OptionsFlow(OptionsFlow):
             return self.async_create_entry(title="", data=data)
         current = self.config_entry.options.get(CONF_IS_24H, DEFAULT_IS_24H)
         minutes = int(self.config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL_MIN))
+        unit = self.config_entry.options.get(CONF_DISTANCE_UNIT, DISTANCE_UNIT_AUTO)
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
                     vol.Optional(CONF_IS_24H, default=current): bool,
+                    vol.Optional(CONF_DISTANCE_UNIT, default=unit): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[DISTANCE_UNIT_AUTO, "km", "mi"],
+                            mode=selector.SelectSelectorMode.DROPDOWN,
+                            translation_key=CONF_DISTANCE_UNIT,
+                        )
+                    ),
                     vol.Optional(CONF_SCAN_INTERVAL, default=minutes): selector.NumberSelector(
                         selector.NumberSelectorConfig(
                             min=MIN_SCAN_INTERVAL_MIN, max=MAX_SCAN_INTERVAL_MIN, step=1,

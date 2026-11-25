@@ -92,7 +92,20 @@ async def test_options_flow_sets_the_clock_format(hass) -> None:
     assert result["type"] is FlowResultType.FORM and result["step_id"] == "init"
     result = await hass.config_entries.options.async_configure(result["flow_id"], {CONF_IS_24H: True})
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.options == {CONF_IS_24H: True, CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL_MIN}  # the default is kept
+    # the defaults are kept
+    assert entry.options == {CONF_IS_24H: True, CONF_SCAN_INTERVAL: DEFAULT_SCAN_INTERVAL_MIN, "distance_unit": "auto"}
+
+
+async def test_options_flow_sets_the_watch_distance_unit(hass) -> None:
+    entry = MockConfigEntry(domain=DOMAIN, unique_id=ADDRESS, data={CONF_ADDRESS: ADDRESS})
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"distance_unit": "mi"})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert entry.options["distance_unit"] == "mi"
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    with pytest.raises(Exception, match="distance_unit|valid"):
+        await hass.config_entries.options.async_configure(result["flow_id"], {"distance_unit": "yd"})
 
 
 async def test_options_flow_sets_the_poll_interval(hass) -> None:

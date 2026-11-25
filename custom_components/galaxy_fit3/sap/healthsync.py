@@ -154,10 +154,34 @@ def build_request_data(seq: int, last_sync: int = 0) -> bytes:
     return bytes([OP_REQUEST_DATA]) + _seq(seq) + _device_info(last_sync)
 
 
-def build_mobile_sync_data(seq: int, last_sync: int = 0) -> bytes:
-    """Phone-initiated SYNC_DATA (``82``) with no phone-side records: stage two of a sync, sent
-    after the watch has answered the REQUEST_DATA."""
-    return bytes([OP_SYNC_DATA, 0x02]) + _seq(seq) + _device_info(last_sync)
+def build_mobile_sync_data(seq: int, last_sync: int = 0, profile: bytes = b"") -> bytes:
+    """Phone-initiated SYNC_DATA (``82``): stage two of a sync, sent after the watch has answered the
+    REQUEST_DATA. It carries no phone-side records unless ``profile`` (a :func:`build_user_profile`
+    block) is given; the second byte counts the blocks: sequence, device info and the profile."""
+    return bytes([OP_SYNC_DATA, 0x03 if profile else 0x02]) + _seq(seq) + _device_info(last_sync) + profile
+
+
+DISTANCE_UNITS = {"km": 1, "mi": 2}
+PROFILE_BLOCK = 0x0B  # USER_PROFILE (data type 11)
+PROFILE_UPDATE_TIME = 0x05
+PROFILE_DISTANCE_UNIT = 0x07
+
+
+def build_user_profile(distance_unit: str, update_time: int) -> bytes:
+    """A user-profile block that sets only the distance unit .
+
+    ``0b <u32 length>`` then the update time (``05`` + protocol seconds, which the watch uses to decide
+    whether the profile is newer than its own), then ``<u32 length>`` and the entries, here just
+    ``07 <1 = km, 2 = mi>``. Entries that are left out are not touched. The layout is the one a phone health app
+    sends; whether the watch applies it from us is checked live.
+    """
+    try:
+        unit = DISTANCE_UNITS[distance_unit]
+    except KeyError:
+        raise ValueError(f"distance unit must be one of {sorted(DISTANCE_UNITS)}, not {distance_unit!r}") from None
+    entries = bytes([PROFILE_DISTANCE_UNIT, unit])
+    body = bytes([PROFILE_UPDATE_TIME]) + struct.pack("<I", update_time & 0xFFFFFFFF) + struct.pack("<I", len(entries)) + entries
+    return bytes([PROFILE_BLOCK]) + struct.pack("<I", len(body)) + body
 
 
 def build_check_status(seq: int) -> bytes:

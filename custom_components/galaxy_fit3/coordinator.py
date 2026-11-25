@@ -15,6 +15,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
 
 from . import ble_support, face_store, heart_rate_history, routing, store_catalog
 from .sap import appframe, faceinstall
@@ -22,10 +23,12 @@ from .bluez_agent import PairingAgent
 from .client import WatchStatus
 from .const import (
     CONF_ADDRESS,
+    CONF_DISTANCE_UNIT,
     CONF_IS_24H,
     CONF_SCAN_INTERVAL,
     DEFAULT_IS_24H,
     DEFAULT_SCAN_INTERVAL_MIN,
+    DISTANCE_UNIT_AUTO,
     DOMAIN,
     HOLD_CONNECTION,
     STATUS_CONNECTED,
@@ -95,6 +98,7 @@ class Fit3Coordinator(DataUpdateCoordinator[WatchStatus]):
         self._client = ble_support.build_client(
             hass, self.address, self._on_disconnect,
             is_24h_provider=lambda: self.entry.options.get(CONF_IS_24H, DEFAULT_IS_24H),
+            distance_unit_provider=self.distance_unit,
             route=self._route,
         )
 
@@ -158,13 +162,21 @@ class Fit3Coordinator(DataUpdateCoordinator[WatchStatus]):
         async_add_external_statistics(self.hass, metadata, stats)
         _LOGGER.info("Fit3 %s: imported %d hourly heart-rate statistics (%d records stored)", self.address, len(stats), len(records))
 
+    def distance_unit(self) -> str:
+        """The unit the watch should show: the option, or with "auto" miles when Home Assistant uses US customary units."""
+        unit = self.entry.options.get(CONF_DISTANCE_UNIT, DISTANCE_UNIT_AUTO)
+        if unit in ("km", "mi"):
+            return unit
+        return "mi" if self.hass.config.units is US_CUSTOMARY_SYSTEM else "km"
+
     async def async_apply_options(self) -> None:
-        """Apply the options now (called when the options flow saves): the poll interval, and the clock format."""
+        """Apply the options now (called when the options flow saves): the poll interval, the clock format and the distance unit."""
         if self.status == STATUS_CONNECTED:  # while disconnected the retry back-off decides
             self.update_interval = poll_interval(self.entry)
         if self._client.is_connected:
             try:
                 await self._client.set_time_rtc(is_24h=self.entry.options.get(CONF_IS_24H, DEFAULT_IS_24H))
+                await self._client.set_distance_unit(self.distance_unit())
             except Exception as err:  # noqa: BLE001 - a settings change must not raise into the UI
                 _LOGGER.warning("Fit3 %s: applying options failed: %s", self.address, err)
 

@@ -7,6 +7,14 @@ which HACS shows when it offers the update.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-25
+
+### Added
+- **Distance unit on the watch.** A new option, *Distance unit on the watch* (Follow Home Assistant, km or miles), and the `galaxy_fit3.set_distance_unit` action set the unit the watch itself shows, without the Samsung app. It is sent in the user-profile block of the integration's sync and only changes the distance unit.
+
+### Changed
+- The distance sensor is first shown in the unit the watch uses (miles when that is miles, otherwise kilometres). Sensors that already exist keep the unit set on the entity.
+
 ## [0.3.0] - 2026-11-21
 
 ### Added
